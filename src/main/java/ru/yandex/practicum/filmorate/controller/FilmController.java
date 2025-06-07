@@ -32,6 +32,9 @@ public class FilmController {
     @ResponseStatus(HttpStatus.CREATED)
     public Film addFilm(@Valid @RequestBody Film film) {
         try {
+            if (!ValidationUtils.isValidName(film.getName())) { // Используем общий метод проверки даты
+                throw new ValidationException("Название фильма обязательно");
+            }
             if (!ValidationUtils.isValidReleaseDate(film.getReleaseDate())) { // Используем общий метод проверки даты
                 throw new ValidationException("Дата выпуска фильма не должна быть раньше 28 декабря 1895 года");
             }
