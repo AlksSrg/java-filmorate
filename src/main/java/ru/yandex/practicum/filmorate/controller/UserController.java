@@ -38,7 +38,7 @@ public class UserController {
             users.put(user.getId(), user);
             log.info("Пользователь с именем '{}' успешно добавлен с ID {}", user.getName(), user.getId());
             return user;
-        } catch (ValidationException e){
+        } catch (ValidationException e) {
             throw new ValidationException(e.getMessage());
         }
     }
