@@ -64,7 +64,7 @@ class FilmControllerTest {
     void testAddEmptyFilm() {
         Film emptyFilm = new Film();
         Throwable exception = catchThrowableOfType(() -> controller.addFilm(emptyFilm), ValidationException.class);
-        assertThat(exception).hasMessage("Имя фильма обязательно.");
+        assertThat(exception).hasMessage("Название фильма обязательно");
     }
 
     //Тест успешного обновления фильма.

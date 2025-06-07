@@ -1,14 +1,14 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import jakarta.validation.Valid;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.utils.ValidationUtils;
 
-import java.time.LocalDate;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -16,10 +16,10 @@ import java.util.Map;
 @RestController
 @RequestMapping("/films")
 @Validated
+@Slf4j
 public class FilmController {
 
     private final Map<Long, Film> films = new HashMap<>();
-    private final Logger log = LoggerFactory.getLogger(FilmController.class);
 
     // Получение списка всех фильмов
     @GetMapping
@@ -29,20 +29,20 @@ public class FilmController {
 
     // Добавление нового фильма
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public Film addFilm(@Valid @RequestBody Film film) {
-        if (film.getName() == null || film.getName().isEmpty()) {
-            throw new ValidationException("Имя фильма обязательно.");
+        try {
+            if (!ValidationUtils.isValidReleaseDate(film.getReleaseDate())) { // Используем общий метод проверки даты
+                throw new ValidationException("Дата выпуска фильма не должна быть раньше 28 декабря 1895 года");
+            }
+            ValidationUtils.validate(film);
+            film.setId(getNextFilmId());
+            films.put(film.getId(), film);
+            log.info("Фильм {} успешно добавлен с ID {}", film.getName(), film.getId());
+            return film;
+        } catch (ValidationException e) {
+            throw new ValidationException(e.getMessage());
         }
-        if (film.getReleaseDate() == null) {
-            throw new ValidationException("Дата выпуска обязательна.");
-        }
-        if (!film.getReleaseDate().isAfter(LocalDate.of(1895, 12, 28))) {
-            throw new ValidationException("Дата выпуска фильма не должна быть раньше 28 декабря 1895 года");
-        }
-        film.setId(getNextFilmId());
-        films.put(film.getId(), film);
-        log.info("Фильм {} успешно добавлен с ID {}", film.getName(), film.getId());
-        return film;
     }
 
     // Обновления информации о фильме
