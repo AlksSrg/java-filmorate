@@ -4,17 +4,19 @@ import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.catchThrowableOfType;
 
 class UserControllerTest {
 
@@ -25,7 +27,8 @@ class UserControllerTest {
     void setup() {
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
         validator = factory.getValidator();
-        controller = new UserController();
+        controller = new UserController(new UserService(new InMemoryUserStorage() {
+        }));
     }
 
     //Тестирование успешного добавления пользователя с корректными данными.
@@ -111,13 +114,19 @@ class UserControllerTest {
     @Test
     void shouldFailUpdatingNonexistentUser() {
         User invalidUser = new User();
-        invalidUser.setId(Long.MAX_VALUE);
+        invalidUser.setId(Long.MAX_VALUE);      // Некорректный ID
         invalidUser.setEmail("nonexistent.user@example.com");
         invalidUser.setLogin("NonexistentUser");
         invalidUser.setBirthday(LocalDate.of(1995, 1, 1));
 
-        Throwable exception = catchThrowableOfType(() -> controller.updateUser(invalidUser), ValidationException.class);
-        assertThat(exception).hasMessageContaining("Пользователя с таким ID не существует.");
+        Throwable exception = Assertions.catchThrowableOfType(
+                () -> controller.updateUser(invalidUser),
+                EntityNotFoundException.class
+        );
+
+        assertThat(exception)
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessageContaining("Пользователь с таким Id (%d) не найден".formatted(invalidUser.getId()));
     }
 
     //Тестирование поведения при наличии пустого имени пользователя.

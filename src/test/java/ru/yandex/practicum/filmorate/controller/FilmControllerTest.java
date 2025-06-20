@@ -2,8 +2,12 @@ package ru.yandex.practicum.filmorate.controller;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
+import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 
 import java.time.LocalDate;
 import java.util.Collection;
@@ -18,7 +22,7 @@ class FilmControllerTest {
     //создаем экземпляр контроллера перед каждым тестом
     @BeforeEach
     void setUp() {
-        controller = new FilmController();
+        controller = new FilmController(new FilmService(new InMemoryFilmStorage(), new InMemoryUserStorage()));
     }
 
     //Тест получения списка всех фильмов.
@@ -93,7 +97,7 @@ class FilmControllerTest {
         nonexistentFilm.setName("New Name");
         nonexistentFilm.setReleaseDate(LocalDate.of(2020, 1, 1));
 
-        Throwable exception = catchThrowableOfType(() -> controller.updateFilm(nonexistentFilm), ValidationException.class);
-        assertThat(exception).hasMessage("Фильма с таким ID не существует");
+        Throwable exception = catchThrowableOfType(() -> controller.updateFilm(nonexistentFilm), EntityNotFoundException.class);
+        assertThat(exception).hasMessage("Фильм с таким Id (%d) не найден".formatted(nonexistentFilm.getId()));
     }
 }
