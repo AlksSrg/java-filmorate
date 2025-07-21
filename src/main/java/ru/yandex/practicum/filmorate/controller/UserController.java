@@ -1,67 +1,96 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import lombok.AllArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.service.UserDbService;
 
 import java.util.Collection;
 
-@RequiredArgsConstructor
+/**
+ * Класс-контроллер для создания и редактирования пользователей
+ */
 @RestController
-@Slf4j
 @RequestMapping("/users")
+@AllArgsConstructor
 public class UserController {
-    private final UserService userService;
 
-    // Получение пользователя по Id
-    @GetMapping("/{id}")
-    public User getUser(@PathVariable Long id) {
-        return userService.getUserById(id);
-    }
+    /**
+     * Поле сервис
+     */
+    private final UserDbService userService;
 
-    // Получение списка всех пользователей
-    @GetMapping
-    public Collection<User> getAllUsers() {
-        return userService.getAllUsers();
-    }
-
-    // Создание нового пользователя
+    /**
+     * Добавляет пользователя в хранилище.
+     */
     @PostMapping
-    public User addUser(@Valid @RequestBody User user) {
-        return userService.addUser(user);
+    public ResponseEntity<User> create(@Valid @RequestBody User user) {
+        User createdUser = userService.getUserStorage().create(user);
+        return ResponseEntity.ok(createdUser);
     }
 
-    // Обновление пользователя
+    /**
+     * Обновляет пользователя в хранилище.
+     */
     @PutMapping
-    public User updateUser(@Valid @RequestBody User newUser) {
-        return userService.updateUser(newUser);
+    public ResponseEntity<User> put(@Valid @RequestBody User user) {
+        User updatedUser = userService.getUserStorage().updateUser(user);
+        return ResponseEntity.ok(updatedUser);
     }
 
-    // Добавление пользователя в друзья
-    @PutMapping("/{userId}/friends/{friendId}")
-    public void addFriend(@PathVariable Long userId, @PathVariable Long friendId) {
-        userService.addFriend(userId, friendId);
+    /**
+     * Добавляет пользователя в друзья.
+     */
+    @PutMapping("{id}/friends/{friendId}")
+    public ResponseEntity<Void> addFriend(@PathVariable Long id, @PathVariable Long friendId) {
+        userService.addFriends(id, friendId);
+        return ResponseEntity.noContent().build();
     }
 
-    // Удаление пользователя из друзей
-    @DeleteMapping("/{userId}/friends/{friendId}")
-    public void removeFriend(@PathVariable Long userId, @PathVariable Long friendId) {
-        userService.removeFriend(userId, friendId);
+    /**
+     * Удаляет пользователя из друзей.
+     */
+    @DeleteMapping("{id}/friends/{friendId}")
+    public ResponseEntity<Void> deleteFriend(@PathVariable Long id, @PathVariable Long friendId) {
+        userService.deleteFriends(id, friendId);
+        return ResponseEntity.noContent().build();
     }
 
-    // Получение списка друзей по Id пользователя
-    @GetMapping("/{userId}/friends")
-    public Collection<User> getAllFriend(@PathVariable Long userId) {
-        return userService.getFriends(userId);
+    /**
+     * Запрашивает всех друзей пользователя.
+     */
+    @GetMapping("{id}/friends")
+    public ResponseEntity<Collection<User>> getFriend(@PathVariable Long id) {
+        Collection<User> friends = userService.getFriends(id);
+        return ResponseEntity.ok(friends);
     }
 
-    // Получение списка общих друзей
-    @GetMapping("/{firstUserId}/friends/common/{secondUserId}")
-    public Collection<User> getCommonFriends(@PathVariable Long firstUserId, @PathVariable Long secondUserId) {
-        return userService.getCommonFriends(firstUserId, secondUserId);
+    /**
+     * Запрашивает пользователя по id.
+     */
+    @GetMapping("{id}")
+    public ResponseEntity<User> getUser(@PathVariable Long id) {
+        User foundUser = userService.getUserStorage().getUserById(id);
+        return ResponseEntity.ok(foundUser);
     }
 
+    /**
+     * Запрашивает общих друзей у двух пользователей.
+     */
+    @GetMapping("{id}/friends/common/{otherId}")
+    public ResponseEntity<Collection<User>> getMutualFriends(@PathVariable Long id, @PathVariable Long otherId) {
+        Collection<User> mutualFriends = userService.getMutualFriends(id, otherId);
+        return ResponseEntity.ok(mutualFriends);
+    }
+
+    /**
+     * Запрашивает коллекцию пользователей.
+     */
+    @GetMapping
+    public ResponseEntity<Collection<User>> getUser() {
+        Collection<User> allUsers = userService.getUserStorage().getUser();
+        return ResponseEntity.ok(allUsers);
+    }
 }

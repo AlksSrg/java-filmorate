@@ -1,29 +1,54 @@
 package ru.yandex.practicum.filmorate.model;
 
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.PastOrPresent;
+import jakarta.validation.constraints.*;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Set;
 
 @Data
+@NoArgsConstructor
 public class User {
+
+    /**
+     * Поле с id пользователя
+     */
     Long id;
 
+    /**
+     * Поле с почтой пользователя
+     */
     @Email(message = "Электронная почта должна соответствовать стандартному формату.")
     @NotBlank(message = "Адрес электронной почты не может быть пустым.")
+    @NotNull
     String email;
 
+    /**
+     * Поле с логином пользователя
+     */
     @NotBlank(message = "Логин пользователя должен быть заполнен.")
+    @NotEmpty
     String login;
 
+    /**
+     * Поле с именем пользователя
+     */
     String name;
 
+    /**
+     * Поле с датой рождения пользователя
+     */
     @PastOrPresent(message = "Дата рождения не может быть в будущем.")
+    @NotNull
     LocalDate birthday;
 
-    private Set<Long> friends = new HashSet<>();
+    /**
+     * Конструктор создание нового объекта пользователя.
+     */
+    public User(String email, String login, String name, LocalDate birthday) {
+        this.email = email;
+        this.login = login;
+        this.name = name;
+        this.birthday = birthday;
+    }
 }
