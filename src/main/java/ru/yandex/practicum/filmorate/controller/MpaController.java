@@ -24,7 +24,10 @@ public class MpaController {
     private final MpaDbService mpaService;
 
     /**
-     * Запрос рейтинга по id
+     * Метод возвращает рейтинг MPA по уникальному идентификатору.
+     *
+     * @param id идентификатор рейтинга
+     * @return объект рейтинга MPA
      */
     @GetMapping("/{id}")
     public Mpa getMpaById(@PathVariable Integer id) {
@@ -33,7 +36,9 @@ public class MpaController {
     }
 
     /**
-     * Запрос списка рейтингов
+     * Метод возвращает полный список всех рейтингов MPAA.
+     *
+     * @return коллекция объектов рейтингов MPAA
      */
     @GetMapping
     public Collection<Mpa> getMpaList() {

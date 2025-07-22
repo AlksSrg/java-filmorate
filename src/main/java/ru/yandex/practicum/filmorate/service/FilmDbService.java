@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Класс-сервис с логикой для оперирования фильмами с хранилищами <b>filmDbStorage<b/> и <b>userDbStorage<b/>
+ * Сервис для обработки бизнес-логики, связанной с фильмами.
  */
 @Service
 @RequiredArgsConstructor
@@ -28,28 +28,31 @@ import java.util.stream.Collectors;
 public class FilmDbService {
 
     /**
-     * Поле с прошлой версией хранилища фильмов
+     * Хранилище фильмов.
      */
     private final FilmStorage filmStorage;
     /**
-     * Поле с прошлой версией хранилища пользователей
+     * Хранилище пользователей.
      */
     private final UserStorage userStorage;
     /**
-     * Поле для доступа к операциям с жанрами
+     * Репозиторий для работы с жанрами.
      */
     private final GenreDao genreDao;
     /**
-     * Поле для доступа к операциям с рейтингом
+     * Репозиторий для работы с рейтингами MPAA.
      */
     private final MpaDao mpaDao;
     /**
-     * Поле для доступа к операциям с лайками
+     * Репозиторий для работы с лайками.
      */
     private final LikeDao likeDao;
 
     /**
-     * Добавление лайка фильму.
+     * Добавляет лайк фильму от определенного пользователя.
+     *
+     * @param userId идентификатор пользователя
+     * @param filmId идентификатор фильма
      */
     public void addLike(Long userId, Long filmId) {
         checkExistence(userId, filmId);
@@ -58,7 +61,10 @@ public class FilmDbService {
     }
 
     /**
-     * Удаление лайка у фильма.
+     * Удаляет лайк у фильма от определенного пользователя.
+     *
+     * @param userId идентификатор пользователя
+     * @param filmId идентификатор фильма
      */
     public void deleteLike(Long userId, Long filmId) {
         likeDao.deleteLike(userId, filmId);
@@ -66,10 +72,13 @@ public class FilmDbService {
     }
 
     /**
-     * Возвращает топ фильмов по лайкам.
+     * Возвращает список популярных фильмов, отсортированных по количеству лайков.
+     *
+     * @param topNumber количество фильмов для отображения
+     * @return список популярных фильмов
      */
     public List<Film> getPopularFilms(int topNumber) {
-        return getFilm().stream()
+        return getFilms().stream()
                 .sorted(Comparator.comparingInt((Film film) -> {
                     int likes = likeDao.checkLikes(film.getId());
                     return likes < 0 ? Integer.MAX_VALUE : likes; // Негативные значения считаем большими
@@ -79,13 +88,16 @@ public class FilmDbService {
     }
 
     /**
-     * Метод создает новый фильм в БД
+     * Создает новый фильм в базе данных.
+     *
+     * @param film объект фильма для создания
+     * @return созданный фильм
      */
-    public Film addFilms(Film film) {
+    public Film addFilm(Film film) {
         // Единственная проверка валидности фильма
         ValidationUtils.validateFilm(film, mpaDao, genreDao);
 
-        Film addedFilm = filmStorage.addFilms(film);
+        Film addedFilm = filmStorage.addFilm(film);
 
         if (film.getGenres() != null && !film.getGenres().isEmpty()) {
             genreDao.updateGenres(addedFilm.getId(), film.getGenres());
@@ -95,7 +107,10 @@ public class FilmDbService {
     }
 
     /**
-     * Метод обновляет данные в БД о фильме
+     * Обновляет данные фильма в базе данных.
+     *
+     * @param film объект фильма с новыми данными
+     * @return обновленный фильм
      */
     public Film updateFilm(Film film) {
         Film currentFilm = filmStorage.getFilmById(film.getId());
@@ -103,20 +118,25 @@ public class FilmDbService {
             throw new EntityNotFoundException("Фильм с указанным ID не найден");
         }
 
-        Film updatedFilm = filmStorage.updateFilms(film);
+        Film updatedFilm = filmStorage.updateFilm(film);
         enrichFilmWithDetails(updatedFilm);
         return updatedFilm;
     }
 
     /**
-     * Метод предоставляет доступ к методу запроса фильмов из хранилища фильмов
+     * Предоставляет доступ к списку всех фильмов.
+     *
+     * @return коллекция фильмов
      */
-    public Collection<Film> getFilm() {
+    public Collection<Film> getFilms() {
         return getAllFilms();
     }
 
     /**
-     * Метод предоставляет доступ к методу получения фильма из хранилища фильмов по id
+     * Возвращает фильм по его идентификатору.
+     *
+     * @param id идентификатор фильма
+     * @return объект фильма
      */
     public Film getFilmById(Long id) {
         try {
@@ -129,16 +149,20 @@ public class FilmDbService {
     }
 
     /**
-     * Метод для получения всех фильмов
+     * Возвращает список всех фильмов c жанрами и рейтингом
+     *
+     * @return коллекция фильмов
      */
     public Collection<Film> getAllFilms() {
-        return filmStorage.getFilm().stream()
+        return filmStorage.getFilms().stream()
                 .peek(this::enrichFilmWithDetails)
                 .collect(Collectors.toList());
     }
 
     /**
-     * Внутренний метод для обогащения фильма дополнительными данными (жанры и рейтинг MPА)
+     * Дополняет фильм информацией о жанрах и рейтинге MPA.
+     *
+     * @param film объект фильма
      */
     private void enrichFilmWithDetails(Film film) {
         // Получить жанры фильма
@@ -149,7 +173,10 @@ public class FilmDbService {
     }
 
     /**
-     * Проверяет существование пользователя и фильма перед добавлением лайка
+     * Проверяет существование пользователя и фильма перед добавлением лайка.
+     *
+     * @param userId идентификатор пользователя
+     * @param filmId идентификатор фильма
      */
     private void checkExistence(Long userId, Long filmId) {
         if (filmStorage.getFilmById(filmId) == null) {

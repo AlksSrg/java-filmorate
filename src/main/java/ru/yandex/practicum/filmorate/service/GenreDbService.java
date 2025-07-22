@@ -9,19 +9,23 @@ import ru.yandex.practicum.filmorate.storage.dao.genre.GenreDao;
 import java.util.Set;
 
 /**
- * Класс-сервис с логикой для работы жанрами
+ * Сервис для работы с жанрами фильмов.
  */
 @Service
 @RequiredArgsConstructor
 public class GenreDbService {
 
     /**
-     * Поле для доступа к операциям с жанрами
+     * Репозиторий для операций с жанрами.
      */
     private final GenreDao genreDao;
 
     /**
-     * Метод получает жанр по его идентификатору
+     * Возвращает жанр по его идентификатору.
+     *
+     * @param id идентификатор жанра
+     * @return объект жанра
+     * @throws EntityNotFoundException если жанр не найден
      */
     public Genre getGenreById(Integer id) {
         if (id == null) {
@@ -31,7 +35,9 @@ public class GenreDbService {
     }
 
     /**
-     * Метод получает коллекцию жанров
+     * Возвращает список всех жанров.
+     *
+     * @return коллекция жанров
      */
     public Set<Genre> getGenres() {
         return genreDao.getGenres();

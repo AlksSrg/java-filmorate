@@ -18,30 +18,38 @@ import java.util.Collection;
 public class UserController {
 
     /**
-     * Поле сервис
+     * Сервис для операций с пользователями.
      */
     private final UserDbService userService;
 
     /**
-     * Добавляет пользователя в хранилище.
+     * Создает нового пользователя и сохраняет его в хранилище.
+     *
+     * @param user объект пользователя для сохранения
+     * @return сохраненный объект пользователя
      */
     @PostMapping
-    public ResponseEntity<User> create(@Valid @RequestBody User user) {
-        User createdUser = userService.getUserStorage().create(user);
-        return ResponseEntity.ok(createdUser);
+    public ResponseEntity<User> createUser(@Valid @RequestBody User user) {
+        return ResponseEntity.ok(userService.createUser(user));
     }
 
     /**
-     * Обновляет пользователя в хранилище.
+     * Обновляет информацию о существующем пользователе.
+     *
+     * @param user объект пользователя с обновленными данными
+     * @return обновленный объект пользователя
      */
     @PutMapping
-    public ResponseEntity<User> put(@Valid @RequestBody User user) {
-        User updatedUser = userService.getUserStorage().updateUser(user);
-        return ResponseEntity.ok(updatedUser);
+    public ResponseEntity<User> updateUser(@Valid @RequestBody User user) {
+        return ResponseEntity.ok(userService.updateUser(user));
     }
 
     /**
-     * Добавляет пользователя в друзья.
+     * Добавляет пользователя в список друзей другого пользователя.
+     *
+     * @param id       идентификатор текущего пользователя
+     * @param friendId идентификатор друга
+     * @return успешный ответ без тела
      */
     @PutMapping("{id}/friends/{friendId}")
     public ResponseEntity<Void> addFriend(@PathVariable Long id, @PathVariable Long friendId) {
@@ -50,7 +58,11 @@ public class UserController {
     }
 
     /**
-     * Удаляет пользователя из друзей.
+     * Удаляет пользователя из списка друзей другого пользователя.
+     *
+     * @param id       идентификатор текущего пользователя
+     * @param friendId идентификатор друга
+     * @return успешный ответ без тела
      */
     @DeleteMapping("{id}/friends/{friendId}")
     public ResponseEntity<Void> deleteFriend(@PathVariable Long id, @PathVariable Long friendId) {
@@ -59,38 +71,46 @@ public class UserController {
     }
 
     /**
-     * Запрашивает всех друзей пользователя.
+     * Возвращает список друзей пользователя.
+     *
+     * @param id идентификатор пользователя
+     * @return коллекция объектов друзей
      */
     @GetMapping("{id}/friends")
-    public ResponseEntity<Collection<User>> getFriend(@PathVariable Long id) {
-        Collection<User> friends = userService.getFriends(id);
-        return ResponseEntity.ok(friends);
+    public ResponseEntity<Collection<User>> getFriends(@PathVariable Long id) {
+        return ResponseEntity.ok(userService.getFriends(id));
     }
 
     /**
-     * Запрашивает пользователя по id.
+     * Возвращает пользователя по его идентификатору.
+     *
+     * @param id идентификатор пользователя
+     * @return найденный объект пользователя
      */
     @GetMapping("{id}")
     public ResponseEntity<User> getUser(@PathVariable Long id) {
-        User foundUser = userService.getUserStorage().getUserById(id);
-        return ResponseEntity.ok(foundUser);
+        return ResponseEntity.ok(userService.getUserById(id));
     }
 
     /**
-     * Запрашивает общих друзей у двух пользователей.
+     * Возвращает список общих друзей между двумя пользователями.
+     *
+     * @param id      идентификатор первого пользователя
+     * @param otherId идентификатор второго пользователя
+     * @return коллекция общих друзей
      */
     @GetMapping("{id}/friends/common/{otherId}")
     public ResponseEntity<Collection<User>> getMutualFriends(@PathVariable Long id, @PathVariable Long otherId) {
-        Collection<User> mutualFriends = userService.getMutualFriends(id, otherId);
-        return ResponseEntity.ok(mutualFriends);
+        return ResponseEntity.ok(userService.getMutualFriends(id, otherId));
     }
 
     /**
-     * Запрашивает коллекцию пользователей.
+     * Возвращает полный список всех зарегистрированных пользователей.
+     *
+     * @return коллекция всех пользователей
      */
     @GetMapping
-    public ResponseEntity<Collection<User>> getUser() {
-        Collection<User> allUsers = userService.getUserStorage().getUser();
-        return ResponseEntity.ok(allUsers);
+    public ResponseEntity<Collection<User>> getUsers() {
+        return ResponseEntity.ok(userService.getAllUsers());
     }
 }

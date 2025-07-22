@@ -24,7 +24,10 @@ public class GenreController {
     private final GenreDbService genreService;
 
     /**
-     * Запрос жанра по указанному идентификатору.
+     * Метод возвращает жанр по заданному идентификатору.
+     *
+     * @param id идентификатор жанра
+     * @return объект жанра
      */
     @GetMapping("/{id}")
     public Genre getGenreById(@PathVariable Integer id) {
@@ -33,7 +36,9 @@ public class GenreController {
     }
 
     /**
-     * Запрос всех существующих жанров.
+     * Метод возвращает коллекцию всех жанров.
+     *
+     * @return набор объектов жанров
      */
     @GetMapping
     public Set<Genre> getGenres() {

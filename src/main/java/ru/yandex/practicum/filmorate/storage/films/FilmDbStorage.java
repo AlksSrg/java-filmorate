@@ -28,7 +28,7 @@ public class FilmDbStorage implements FilmStorage {
     private final JdbcTemplate jdbcTemplate;
 
     @Override
-    public Film addFilms(Film film) {
+    public Film addFilm(Film film) {
         String sqlInsert =
                 "INSERT INTO film (name, description, release_date, duration, mpa_id) VALUES (?,?,?,?,?)";
 
@@ -52,7 +52,7 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public Film updateFilms(Film film) {
+    public Film updateFilm(Film film) {
         Long filmId = film.getId();
         if (filmId == null) {
             throw new IllegalArgumentException("ID фильма должен быть указан для обновления");
@@ -69,7 +69,7 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public Collection<Film> getFilm() {
+    public Collection<Film> getFilms() {
         return jdbcTemplate.query("SELECT * FROM film", new FilmMapper());
     }
 

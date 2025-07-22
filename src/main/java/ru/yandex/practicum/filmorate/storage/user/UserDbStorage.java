@@ -23,7 +23,7 @@ public class UserDbStorage implements UserStorage {
     private final JdbcTemplate jdbcTemplate;
 
     @Override
-    public User create(User user) {
+    public User addUser(User user) {
         log.debug("Добавление нового пользователя.");
         try {
             if (user.getName() == null || user.getName().trim().isEmpty()) {
@@ -62,7 +62,7 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
-    public Collection<User> getUser() {
+    public Collection<User> getUsers() {
         return jdbcTemplate.query("SELECT * FROM users", new UserMapper());
     }
 

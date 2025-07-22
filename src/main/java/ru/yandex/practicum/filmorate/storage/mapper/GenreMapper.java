@@ -7,12 +7,17 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
- * Маппер для реализации сущности Genre из данных полученных в БД
+ * Класс маппера для преобразования строк базы данных в объекты типа {@link Genre}.
  */
 public class GenreMapper implements RowMapper<Genre> {
 
     /**
-     * Метод преобразования данных из БД в сущность
+     * Преобразует строку результата SQL-запроса в объект типа {@link Genre}.
+     *
+     * @param rs     результирующее множество записей
+     * @param rowNum номер строки
+     * @return объект типа {@link Genre}, соответствующий строке результата
+     * @throws SQLException если возникает ошибка при извлечении данных из ResultSet
      */
     @Override
     public Genre mapRow(ResultSet rs, int rowNum) throws SQLException {

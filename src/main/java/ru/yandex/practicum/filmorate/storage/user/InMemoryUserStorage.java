@@ -11,26 +11,30 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Класс-хранилище реализующий интерфейс для хранения и обновления пользователей со свойствами
+ * Класс хранилища пользователей в оперативной памяти.
  */
 @Component("InMemoryUserStorage")
 @Slf4j
 public class InMemoryUserStorage implements UserStorage {
 
     /**
-     * Поле хранилище пользователей
+     * Карта для хранения пользователей (ключ — идентификатор пользователя, значение — объект пользователя).
      */
     private final Map<Long, User> users = new HashMap<>();
 
     /**
-     * Поле счетчик идентификаторов пользователей
+     * Счётчик уникальных идентификаторов пользователей.
      */
     private Long id = 1L;
 
     /**
-     * Метод добавления пользователя.
+     * Регистрирует нового пользователя в хранилище.
+     *
+     * @param user объект пользователя для регистрации
+     * @return зарегистрированный пользователь
+     * @throws ValidationException если пользователь с таким идентификатором уже существует
      */
-    public User create(User user) {
+    public User addUser(User user) {
         if (users.containsKey(user.getId())) {
             log.debug("Пользователь с данным id уже существует");
             throw new ValidationException(String.format("Пользователь с id %s уже зарегистрирован.", user.getId()));
@@ -43,7 +47,11 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     /**
-     * Метод обновления пользователя.
+     * Обновляет информацию о пользователе в хранилище.
+     *
+     * @param user объект пользователя с обновлёнными данными
+     * @return обновлённый пользователь
+     * @throws EntityNotFoundException если пользователь с указанным идентификатором не найден
      */
     public User updateUser(User user) {
         Long userId = user.getId();
@@ -58,15 +66,21 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     /**
-     * Получение списка пользователей.
+     * Возвращает коллекцию всех зарегистрированных пользователей.
+     *
+     * @return коллекция пользователей
      */
-    public Collection<User> getUser() {
+    public Collection<User> getUsers() {
         log.debug("Запрошен список пользователей, их количество: {}", users.size());
         return users.values();
     }
 
     /**
-     * Метод получение пользователя по id.
+     * Возвращает пользователя по его идентификатору.
+     *
+     * @param id идентификатор пользователя
+     * @return объект пользователя
+     * @throws EntityNotFoundException если пользователь с указанным идентификатором не найден
      */
     public User getUserById(Long id) {
         if (users.containsKey(id)) {

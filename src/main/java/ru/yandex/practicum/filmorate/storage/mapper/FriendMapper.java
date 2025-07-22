@@ -7,12 +7,17 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
- * Маппер для реализации сущности Friend из данных полученных в БД
+ * Класс маппера для преобразования строк базы данных в объекты типа {@link Friend}.
  */
 public class FriendMapper implements RowMapper<Friend> {
 
     /**
-     * Метод преобразования данных из БД в сущность
+     * Преобразует строку результата SQL-запроса в объект типа {@link Friend}.
+     *
+     * @param rs     результирующее множество записей
+     * @param rowNum номер строки
+     * @return объект типа {@link Friend}, соответствующий строке результата
+     * @throws SQLException если возникает ошибка при извлечении данных из ResultSet
      */
     @Override
     public Friend mapRow(ResultSet rs, int rowNum) throws SQLException {

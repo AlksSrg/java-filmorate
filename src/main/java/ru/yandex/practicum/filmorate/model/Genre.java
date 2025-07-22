@@ -12,14 +12,14 @@ import lombok.NoArgsConstructor;
 public class Genre {
 
     /**
-     * Поле идентификатор жанра
+     * Уникальный идентификатор жанра, обязательное поле.
      */
     @NotBlank(message = "ID Жанра должен быть обязательно")
-    Integer id;
+    private Integer id;
 
     /**
-     * Поле содержащие имя жанра
+     * Название жанра, обязательное поле.
      */
     @NotBlank(message = "Название жанра обязательно")
-    String name;
+    private String name;
 }

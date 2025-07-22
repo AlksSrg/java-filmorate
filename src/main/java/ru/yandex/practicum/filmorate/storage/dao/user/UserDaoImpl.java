@@ -22,7 +22,7 @@ public class UserDaoImpl implements UserStorage {
     private final JdbcTemplate jdbcTemplate;
 
     @Override
-    public User create(User user) {
+    public User addUser(User user) {
         jdbcTemplate.update(
                 "INSERT INTO users (email, login, name, birthday) VALUES (?, ?, ?, ?)",
                 user.getEmail(), user.getLogin(), user.getName(), Date.valueOf(user.getBirthday())
@@ -47,7 +47,7 @@ public class UserDaoImpl implements UserStorage {
     }
 
     @Override
-    public Collection<User> getUser() {
+    public Collection<User> getUsers() {
         return jdbcTemplate.query("SELECT * FROM users", new UserMapper());
     }
 

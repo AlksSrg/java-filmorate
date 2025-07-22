@@ -61,7 +61,7 @@ public class FriendDaoImpl implements FriendDao {
     }
 
     @Override
-    public List<Long> getFriend(Long userId) {
+    public List<Long> getFriends(Long userId) {
         return jdbcTemplate.queryForList(
                 "SELECT friend_id FROM friends WHERE user_id = ?",
                 Long.class,

@@ -11,39 +11,44 @@ import java.time.LocalDate;
 public class User {
 
     /**
-     * Поле с id пользователя
+     * Уникальный идентификатор пользователя.
      */
-    Long id;
+    private Long id;
 
     /**
-     * Поле с почтой пользователя
+     * Электронная почта пользователя, должна быть валидной и обязательной.
      */
     @Email(message = "Электронная почта должна соответствовать стандартному формату.")
     @NotBlank(message = "Адрес электронной почты не может быть пустым.")
     @NotNull
-    String email;
+    private String email;
 
     /**
-     * Поле с логином пользователя
+     * Логин пользователя, обязательный для заполнения.
      */
     @NotBlank(message = "Логин пользователя должен быть заполнен.")
     @NotEmpty
-    String login;
+    private String login;
 
     /**
-     * Поле с именем пользователя
+     * Имя пользователя (может быть пустым).
      */
-    String name;
+    private String name;
 
     /**
-     * Поле с датой рождения пользователя
+     * Дата рождения пользователя, обязательная и не может быть в будущем.
      */
     @PastOrPresent(message = "Дата рождения не может быть в будущем.")
     @NotNull
-    LocalDate birthday;
+    private LocalDate birthday;
 
     /**
-     * Конструктор создание нового объекта пользователя.
+     * Конструктор для создания экземпляра пользователя с указанными параметрами.
+     *
+     * @param email    электронная почта пользователя
+     * @param login    логин пользователя
+     * @param name     имя пользователя
+     * @param birthday дата рождения пользователя
      */
     public User(String email, String login, String name, LocalDate birthday) {
         this.email = email;

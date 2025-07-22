@@ -5,17 +5,22 @@ import ru.yandex.practicum.filmorate.model.Mpa;
 import java.util.List;
 
 /**
- * Интерфейс для работы с логикой касающиеся рейтинга
+ * Интерфейс для работы с рейтингами MPA.
  */
 public interface MpaDao {
 
     /**
-     * Запрос рейтинга по идентификатору
+     * Возвращает рейтинг MPA по его идентификатору.
+     *
+     * @param id идентификатор рейтинга
+     * @return объект рейтинга MPA
      */
     Mpa getMpaById(Integer id);
 
     /**
-     * Запрос списка рейтингов.
+     * Возвращает список всех рейтингов MPA.
+     *
+     * @return список рейтингов MPA
      */
     List<Mpa> getListMpa();
 }

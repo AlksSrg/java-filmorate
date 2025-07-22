@@ -7,12 +7,17 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
- * Маппер для реализации сущности User из данных полученных в БД
+ * Класс маппера для преобразования строк базы данных в объекты типа {@link User}.
  */
 public class UserMapper implements RowMapper<User> {
 
     /**
-     * Метод преобразования данных из БД в сущность
+     * Преобразует строку результата SQL-запроса в объект типа {@link User}.
+     *
+     * @param rs     результирующее множество записей
+     * @param rowNum номер строки
+     * @return объект типа {@link User}, соответствующий строке результата
+     * @throws SQLException если возникает ошибка при извлечении данных из ResultSet
      */
     @Override
     public User mapRow(ResultSet rs, int rowNum) throws SQLException {

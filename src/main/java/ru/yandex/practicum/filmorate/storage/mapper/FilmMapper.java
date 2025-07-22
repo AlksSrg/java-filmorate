@@ -8,12 +8,17 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
- * Маппер для реализации сущности Film из данных полученных в БД
+ * Класс маппера для преобразования строк базы данных в объекты типа {@link Film}.
  */
 public class FilmMapper implements RowMapper<Film> {
 
     /**
-     * Метод преобразования данных из БД в сущность Film
+     * Преобразует строку результата SQL-запроса в объект типа {@link Film}.
+     *
+     * @param rs     результирующее множество записей
+     * @param rowNum номер строки
+     * @return объект типа {@link Film}, соответствующий строке результата
+     * @throws SQLException если возникает ошибка при извлечении данных из ResultSet
      */
     @Override
     public Film mapRow(ResultSet rs, int rowNum) throws SQLException {

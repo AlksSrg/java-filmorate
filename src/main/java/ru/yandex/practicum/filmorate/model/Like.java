@@ -8,12 +8,12 @@ import lombok.NoArgsConstructor;
 public class Like {
 
     /**
-     * Поле содержащие айди фильма
+     * Идентификатор фильма, которому поставлен лайк.
      */
-    Long filmId;
+    private Long filmId;
 
     /**
-     * Поле содержащие айди пользователя
+     * Идентификатор пользователя, поставившего лайк.
      */
-    Long userId;
+    private Long userId;
 }

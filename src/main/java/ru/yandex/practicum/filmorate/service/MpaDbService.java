@@ -10,7 +10,7 @@ import ru.yandex.practicum.filmorate.storage.dao.mpa.MpaDao;
 import java.util.Collection;
 
 /**
- * Класс-сервис с логикой для работы с рейтингом
+ * Репозиторий для операций с рейтингами MPA.
  */
 @Service
 @RequiredArgsConstructor
@@ -22,7 +22,11 @@ public class MpaDbService {
     private final MpaDao mpaDao;
 
     /**
-     * Метод получает рейтинг по его идентификатору
+     * Возвращает рейтинг MPA по его идентификатору.
+     *
+     * @param id идентификатор рейтинга
+     * @return объект рейтинга MPA
+     * @throws EntityNotFoundException если рейтинг не найден
      */
     public Mpa getMpaById(Integer id) {
         try {
@@ -33,7 +37,9 @@ public class MpaDbService {
     }
 
     /**
-     * Метод получает коллекция рейтинга
+     * Возвращает список всех рейтингов MPA.
+     *
+     * @return коллекция рейтингов MPAA
      */
     public Collection<Mpa> getListMpa() {
         return mpaDao.getListMpa();

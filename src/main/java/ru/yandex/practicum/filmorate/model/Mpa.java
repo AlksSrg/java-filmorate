@@ -11,13 +11,13 @@ import lombok.NoArgsConstructor;
 public class Mpa {
 
     /**
-     * Поле с идентификатором рейтинга.
+     * Уникальный идентификатор рейтинга MPA.
      */
     @NotNull
     private Integer id;
 
     /**
-     * Поле именем рейтинга.
+     * Название рейтинга MPA.
      */
     @NotNull
     private String name;

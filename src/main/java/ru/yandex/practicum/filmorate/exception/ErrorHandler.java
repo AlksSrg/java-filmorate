@@ -14,7 +14,10 @@ import java.util.Map;
 public class ErrorHandler {
 
     /**
-     * Обрабатываем случаи нарушения валидации
+     * Обработчик исключений, связанных с нарушением правил валидации полей.
+     *
+     * @param ex исключение ValidationException
+     * @return сформированный ответ с сообщением об ошибке и статус-код BAD_REQUEST
      */
     @ExceptionHandler(ValidationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -23,7 +26,10 @@ public class ErrorHandler {
     }
 
     /**
-     * Обрабатываем случаи нарушения валидации
+     * Обработчик исключений, возникающих при неправильной передаче аргументов метода контроллера.
+     *
+     * @param ex исключение MethodArgumentNotValidException
+     * @return сформированный ответ с сообщением об ошибке и статус-код BAD_REQUEST
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -32,7 +38,10 @@ public class ErrorHandler {
     }
 
     /**
-     * Обрабатываем ситуации, когда ресурс не найден
+     * Обработчик исключений, возникающих при попытке обращения к несуществующему ресурсу.
+     *
+     * @param ex исключение EntityNotFoundException
+     * @return сформированный ответ с сообщением об ошибке и статус-код NOT_FOUND
      */
     @ExceptionHandler(EntityNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
@@ -41,7 +50,10 @@ public class ErrorHandler {
     }
 
     /**
-     * Обрабатываем любые другие исключения, приводящие к внутренней ошибке сервера
+     * Обработчик любых других необработанных исключений, приводящих к состоянию внутреннего сбоя сервера.
+     *
+     * @param ex общее исключение Exception
+     * @return сформированный ответ с сообщением об ошибке и статус-код INTERNAL_SERVER_ERROR
      */
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -50,7 +62,11 @@ public class ErrorHandler {
     }
 
     /**
-     * Формирует стандартный JSON-ответ с информацией об ошибке.
+     * Вспомогательный приватный метод, формирующий стандартизированный JSON-ответ с сообщением об ошибке.
+     *
+     * @param message сообщение об ошибке
+     * @param status  HTTP-статус ответа
+     * @return сформированный ответ с телом, содержащим ошибку
      */
     private ResponseEntity<Map<String, Object>> createErrorResponse(String message, HttpStatus status) {
         Map<String, Object> errorResponse = Collections.singletonMap("message", message);

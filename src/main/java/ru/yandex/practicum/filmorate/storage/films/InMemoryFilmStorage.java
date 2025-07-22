@@ -12,26 +12,29 @@ import java.util.Map;
 import java.util.TreeSet;
 
 /**
- * Класс-хранилище реализующий интерфейс для хранения и обновления фильмов
+ * Реализация хранилища фильмов в памяти.
  */
 @Component("InMemoryFilmStorage")
 @Slf4j
 public class InMemoryFilmStorage implements FilmStorage {
 
     /**
-     * Поле хранилище фильмов
+     * Хранит фильмы в виде карты (ключ — идентификатор фильма, значение — объект фильма).
      */
     private final Map<Long, Film> films = new HashMap<>();
 
     /**
-     * Поле счетчик идентификаторов фильмов
+     * Генерирует уникальные идентификаторы фильмов.
      */
     private Long id = 1L;
 
     /**
-     * Метод добавление фильма.
+     * Добавляет новый фильм в хранилище.
+     *
+     * @param film объект фильма для добавления
+     * @return добавленный фильм
      */
-    public Film addFilms(Film film) {
+    public Film addFilm(Film film) {
         if (film == null) {
             throw new IllegalArgumentException("Фильм не может быть null");
         }
@@ -42,9 +45,12 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     /**
-     * Метод обновления фильма.
+     * Обновляет информацию о фильме в хранилище.
+     *
+     * @param film объект фильма с обновлёнными данными
+     * @return обновлённый фильм
      */
-    public Film updateFilms(Film film) {
+    public Film updateFilm(Film film) {
         Long filmId = film.getId();
         if (films.containsKey(filmId)) {
             log.debug("Фильм обновлен");
@@ -57,15 +63,20 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     /**
-     * Метод получения списка фильмов.
+     * Возвращает коллекцию всех фильмов.
+     *
+     * @return коллекция фильмов
      */
-    public Collection<Film> getFilm() {
+    public Collection<Film> getFilms() {
         log.debug("Запрошен список фильмов, их количество: {} ", films.size());
         return films.values();
     }
 
     /**
-     * Метод получения фильма по id.
+     * Возвращает фильм по его идентификатору.
+     *
+     * @param id идентификатор фильма
+     * @return объект фильма
      */
     public Film getFilmById(Long id) {
         if (films.containsKey(id)) {
@@ -78,7 +89,10 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     /**
-     * Метод для полноценной имплементации интерфейса
+     * Возврат набора жанров для фильма (метод заглушка).
+     *
+     * @param filmId идентификатор фильма
+     * @return временный объект TreeSet<Genre>
      */
     @Override
     public TreeSet<Genre> getGenresByFilm(Long filmId) {

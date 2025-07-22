@@ -7,31 +7,45 @@ import java.util.Collection;
 import java.util.Set;
 
 /**
- * Интерфейс для работы с хранилищем фильмов
+ * Интерфейс для работы с хранилищем фильмов.
  */
 public interface FilmStorage {
     /**
-     * Метод добавления фильма
+     * Сохраняет новый фильм в хранилище.
+     *
+     * @param film объект фильма для сохранения
+     * @return сохранённый фильм
      */
-    Film addFilms(Film film);
+    Film addFilm(Film film);
 
     /**
-     * Метод изменения фильма
+     * Обновляет информацию о фильме в хранилище.
+     *
+     * @param film объект фильма с обновлёнными данными
+     * @return обновлённый фильм
      */
-    Film updateFilms(Film film);
+    Film updateFilm(Film film);
 
     /**
-     * Запрос коллекции фильмов
+     * Возвращает коллекцию всех фильмов.
+     *
+     * @return коллекция фильмов
      */
-    Collection<Film> getFilm();
+    Collection<Film> getFilms();
 
     /**
-     * Запрос фильма по id
+     * Возвращает фильм по его идентификатору.
+     *
+     * @param id идентификатор фильма
+     * @return объект фильма
      */
     Film getFilmById(Long id);
 
     /**
-     * Метод получения жанра по идентификатору фильма
+     * Возвращает набор жанров, относящихся к данному фильму.
+     *
+     * @param filmId идентификатор фильма
+     * @return набор жанров фильма
      */
     Set<Genre> getGenresByFilm(Long filmId);
 }

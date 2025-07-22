@@ -3,8 +3,6 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
@@ -12,15 +10,16 @@ import ru.yandex.practicum.filmorate.storage.dao.friends.FriendDao;
 import ru.yandex.practicum.filmorate.storage.dao.genre.GenreDao;
 import ru.yandex.practicum.filmorate.storage.dao.like.LikeDao;
 import ru.yandex.practicum.filmorate.storage.dao.mpa.MpaDao;
-import ru.yandex.practicum.filmorate.storage.user.UserDbStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
+import ru.yandex.practicum.filmorate.utils.ValidationUtils;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
- * Класс-сервис с логикой для работы с пользователями
+ * Сервис для обработки запросов, связанных с пользователями.
  */
 @Getter
 @Service
@@ -29,45 +28,68 @@ import java.util.stream.Collectors;
 public class UserDbService {
 
     /**
-     * Поле с прошлой версией хранилища пользователей
+     * Хранилище пользователей.
      */
     private final UserStorage userStorage;
     /**
-     * Поле для доступа к операциям с жанрами
+     * Репозиторий для работы с жанрами.
      */
     private final GenreDao genreDao;
     /**
-     * Поле для доступа к операциям с рейтингом
+     * Репозиторий для работы с рейтингами MPA.
      */
     private final MpaDao mpaDao;
     /**
-     * Поле для доступа к операциям с лайками
+     * Репозиторий для работы с лайками.
      */
     private final LikeDao likeDao;
     /**
-     * Поле для доступа к операциям с друзьями
+     * Репозиторий для работы с друзьями.
      */
     private final FriendDao friendDao;
 
     /**
-     * Конструктор сервиса.
+     * Регистрирует нового пользователя.
+     *
+     * @param user объект пользователя для регистрации
+     * @return зарегистрированный пользователь
      */
-    @Autowired
-    public UserDbService(@Qualifier("UserDbStorage") UserDbStorage userStorage,
-                         GenreDao genreDao,
-                         MpaDao mpaDao,
-                         LikeDao likeDao,
-                         FriendDao friendDao) {
-
-        this.userStorage = userStorage;
-        this.genreDao = genreDao;
-        this.mpaDao = mpaDao;
-        this.likeDao = likeDao;
-        this.friendDao = friendDao;
+    public User createUser(User user) {
+        log.info("Добавление пользователя c именем {} в базу данных.", user.getName());
+        ValidationUtils.validateUser(user);
+        return userStorage.addUser(user);
     }
 
     /**
-     * Добавление в друзья.
+     * Обновляет информацию о пользователе.
+     *
+     * @param user объект пользователя с обновлёнными данными
+     * @return обновлённый пользователь
+     */
+    public User updateUser(User user) {
+        log.info("Обновление пользователя c именем {} в базе данных.", user.getName());
+        if (userStorage.getUserById(user.getId()) == null) {
+            throw new EntityNotFoundException("Такого пользователя не существует");
+        }
+        return userStorage.updateUser(user);
+    }
+
+    /**
+     * Возвращает пользователя по его идентификатору.
+     *
+     * @param id идентификатор пользователя
+     * @return объект пользователя
+     */
+    public User getUserById(Long id) {
+        log.info("Получение пользователя c id {} из базе данных.", id);
+        return userStorage.getUserById(id);
+    }
+
+    /**
+     * Добавляет пользователя в список друзей другому пользователю.
+     *
+     * @param userId   идентификатор пользователя, который добавляет в друзья
+     * @param idFriend идентификатор пользователя, которого добавляют в друзья
      */
     public void addFriends(Long userId, Long idFriend) {
         if (userId > 0 && idFriend > 0) {
@@ -80,7 +102,10 @@ public class UserDbService {
     }
 
     /**
-     * Удаление из друзей.
+     * Удаляет пользователя из списка друзей.
+     *
+     * @param userId   идентификатор пользователя, который удаляет из друзей
+     * @param idFriend идентификатор пользователя, которого удаляют из друзей
      */
     public void deleteFriends(Long userId, Long idFriend) {
         log.info("Пользователь {} удаляет из друзей пользователя {}.", userId, idFriend);
@@ -100,7 +125,11 @@ public class UserDbService {
     }
 
     /**
-     * Получение списка общих друзей у двух пользователей.
+     * Возвращает список общих друзей у двух пользователей.
+     *
+     * @param userId   идентификатор первого пользователя
+     * @param idFriend идентификатор второго пользователя
+     * @return список общих друзей
      */
     public List<User> getMutualFriends(Long userId, Long idFriend) {
         List<User> userFriends = getFriends(userId);
@@ -116,7 +145,10 @@ public class UserDbService {
     }
 
     /**
-     * Получение списка друзей у пользователя.
+     * Возвращает список друзей пользователя.
+     *
+     * @param id идентификатор пользователя
+     * @return список друзей пользователя
      */
     public List<User> getFriends(Long id) {
         if (userStorage.getUserById(id).getEmail().isEmpty()) {
@@ -126,9 +158,19 @@ public class UserDbService {
         }
         log.info("Запрошены друзья у пользователя с id {}", id);
 
-        return friendDao.getFriend(id).stream()
+        return friendDao.getFriends(id).stream()
                 .mapToLong(Long::valueOf)
                 .mapToObj(userStorage::getUserById)
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * Возвращает коллекцию всех зарегистрированных пользователей.
+     *
+     * @return коллекция объектов {@link User}, хранящихся в базе данных
+     */
+    public Collection<User> getAllUsers() {
+        log.info("Запрошены все пользователи из базы данных.");
+        return userStorage.getUsers();
     }
 }

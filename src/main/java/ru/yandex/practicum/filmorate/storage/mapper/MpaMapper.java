@@ -7,12 +7,17 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
- * Маппер для реализации сущности Mpa из данных полученных в БД
+ * Класс маппера для преобразования строк базы данных в объекты типа {@link Mpa}.
  */
 public class MpaMapper implements RowMapper<Mpa> {
 
     /**
-     * Метод преобразования данных из БД в сущность
+     * Преобразует строку результата SQL-запроса в объект типа {@link Mpa}.
+     *
+     * @param rs     результирующее множество записей
+     * @param rowNum номер строки
+     * @return объект типа {@link Mpa}, соответствующий строке результата
+     * @throws SQLException если возникает ошибка при извлечении данных из ResultSet
      */
     @Override
     public Mpa mapRow(ResultSet rs, int rowNum) throws SQLException {
