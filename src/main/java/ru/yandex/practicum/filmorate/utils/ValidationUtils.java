@@ -1,10 +1,8 @@
 package ru.yandex.practicum.filmorate.utils;
 
-import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
-import jakarta.validation.groups.Default;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
@@ -13,7 +11,6 @@ import ru.yandex.practicum.filmorate.storage.dao.genre.GenreDao;
 import ru.yandex.practicum.filmorate.storage.dao.mpa.MpaDao;
 
 import java.time.LocalDate;
-import java.util.Set;
 
 /**
  * Утилита для общих проверок валидации.
