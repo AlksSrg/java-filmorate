@@ -1,30 +1,71 @@
 package ru.yandex.practicum.filmorate.model;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Past;
-import jakarta.validation.constraints.Positive;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.hibernate.validator.constraints.Length;
 
 import java.time.LocalDate;
 import java.util.HashSet;
-import java.util.Set;
 
 @Data
+@NoArgsConstructor
 public class Film {
+
+    /**
+     * Уникальный идентификатор фильма.
+     */
     private Long id;
 
+    /**
+     * Название фильма, обязательное для заполнения, длина от 1 до 255 символов.
+     */
     @NotBlank(message = "Название фильма обязательно")
+    @Length(min = 1, max = 255, message = "Название фильма должно быть длиной от 1 до 255 символов.")
     private String name;
 
-    @Size(max = 200, message = "Длина описания фильма не должна превышать 200 символов")
+    /**
+     * Описание фильма, обязательное для заполнения, максимум 200 символов.
+     */
+    @NotBlank
+    @Size(max = 200, message = "Описание фильма не должно превышать 200 символов")
     private String description;
 
+    /**
+     * Дата выпуска фильма, значение должно быть не ранее 28 декабря 1895 года.
+     */
     @Past(message = "Дата релиза должна быть позже или равна 28 декабря 1895 года")
     private LocalDate releaseDate;
 
-    @Positive(message = "Продолжительность фильма должна быть положительным числом")
+    /**
+     * Длительность фильма в минутах, значение должно быть неотрицательным.
+     */
+    @PositiveOrZero(message = "Продолжительность фильма должна быть неотрицательным числом")
     private Integer duration;
 
-    private Set<Long> like = new HashSet<>();
+    /**
+     * Набор жанров, к которым относится фильм.
+     */
+    private HashSet<Genre> genres;
+
+    /**
+     * Рейтинг MPA фильма, обязательное поле.
+     */
+    @NotNull
+    private Mpa mpa;
+
+    /**
+     * Конструктор для инициализации объекта фильма основными полями.
+     *
+     * @param name        название фильма
+     * @param description описание фильма
+     * @param releaseDate дата выхода фильма
+     * @param duration    продолжительность фильма
+     */
+    public Film(String name, String description, LocalDate releaseDate, int duration) {
+        this.name = name;
+        this.description = description;
+        this.releaseDate = releaseDate;
+        this.duration = duration;
+    }
 }
