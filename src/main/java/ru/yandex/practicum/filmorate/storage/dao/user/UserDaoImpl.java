@@ -59,4 +59,11 @@ public class UserDaoImpl implements UserStorage {
             throw new EntityNotFoundException("Пользователь с id " + id + " не найден");
         }
     }
+
+    @Override
+    public void deleteById(long id) {
+        if (jdbcTemplate.update("DELETE FROM users WHERE user_id = ?", id) == 0) {
+            throw new EntityNotFoundException(String.format("Пользователя с id %s и так не существует", id));
+        }
+    }
 }

@@ -186,4 +186,13 @@ public class FilmDbService {
             throw new EntityNotFoundException("Пользователь с таким Id не существует");
         }
     }
+
+    /**
+     * Удаление фильма по id.
+     *
+     * @param id идентификатор фильма
+     */
+    public void deleteFilmById(long id) {
+        filmStorage.deleteById(id);
+    }
 }

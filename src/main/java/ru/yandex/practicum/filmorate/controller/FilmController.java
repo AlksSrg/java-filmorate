@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -106,5 +107,17 @@ public class FilmController {
     @GetMapping("/popular")
     public Collection<Film> getPopularFilms(@RequestParam(value = "count", defaultValue = "10") Integer count) {
         return filmService.getPopularFilms(count);
+    }
+
+    /**
+     * Удаление фильма по идентификатору.
+     *
+     * @param filmId уникальный идентификатор фильма
+     * @return пустой ответ с успешным статусом
+     */
+    @DeleteMapping("/{filmId}")
+    public ResponseEntity<Void> deleteFilmById(@PathVariable @Positive Long filmId) {
+        filmService.deleteFilmById(filmId);
+        return ResponseEntity.noContent().build();
     }
 }
