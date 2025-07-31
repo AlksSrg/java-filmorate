@@ -6,10 +6,7 @@ import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.TreeSet;
+import java.util.*;
 
 /**
  * Реализация хранилища фильмов в памяти.
@@ -92,10 +89,10 @@ public class InMemoryFilmStorage implements FilmStorage {
      * Возврат набора жанров для фильма (метод заглушка).
      *
      * @param filmId идентификатор фильма
-     * @return временный объект TreeSet<Genre>
+     * @return временный объект Set<Genre>
      */
     @Override
-    public TreeSet<Genre> getGenresByFilm(Long filmId) {
+    public Set<Genre> getGenresByFilm(Long filmId) {
         // Тут временно возвращаем null, пока не будет полной реализации
         return null;
     }
@@ -109,5 +106,13 @@ public class InMemoryFilmStorage implements FilmStorage {
     public void deleteById(long id) {
         log.warn("Использование устаревшей реализации");
         throw new UnsupportedOperationException("Метод не поддерживается в устаревшей реализации");
+    }
+
+    /**
+     * Метод заглушка для неактуальной реализации.
+     */
+    @Override
+    public Collection<Film> getFilmsByUser(Long id) {
+        return null;
     }
 }

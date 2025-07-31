@@ -87,8 +87,8 @@ public class FilmDbStorage implements FilmStorage {
     public Set<Genre> getGenresByFilm(Long filmId) {
         List<Genre> genresList = jdbcTemplate.query(
                 "SELECT f.genre_id, g.genre_name FROM film_genre AS f " +
-                "LEFT OUTER JOIN genre AS g ON f.genre_id = g.genre_id " +
-                "WHERE f.film_id=? ORDER BY g.genre_id",
+                        "LEFT OUTER JOIN genre AS g ON f.genre_id = g.genre_id " +
+                        "WHERE f.film_id=? ORDER BY g.genre_id",
                 new GenreMapper(),
                 filmId
         );
@@ -104,5 +104,12 @@ public class FilmDbStorage implements FilmStorage {
         if (jdbcTemplate.update("DELETE FROM film WHERE film_id = ?", id) == 0) {
             throw new EntityNotFoundException(String.format("Фильма с id %s и так не существует", id));
         }
+    }
+
+    @Override
+    public Collection<Film> getFilmsByUser(Long id) {
+        return jdbcTemplate
+                .query("SELECT * FROM film WHERE film_id IN (SELECT film_id FROM likes WHERE user_id = ?)",
+                        new FilmMapper(), id);
     }
 }
