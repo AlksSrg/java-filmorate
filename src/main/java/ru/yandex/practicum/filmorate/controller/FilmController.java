@@ -101,10 +101,16 @@ public class FilmController {
      * Получает список наиболее популярных фильмов.
      *
      * @param count количество возвращаемых фильмов (по умолчанию — 10)
+     * @param genreId идентификатор жанра для фильтрации
+     * @param year год выпуска фильма для фильтрации
      * @return коллекция популярных фильмов
      */
     @GetMapping("/popular")
-    public Collection<Film> getPopularFilms(@RequestParam(value = "count", defaultValue = "10") Integer count) {
-        return filmService.getPopularFilms(count);
+    public Collection<Film> getPopularFilms(
+            @RequestParam(value = "count", defaultValue = "10") Integer count,
+            @RequestParam(value = "genreId", required = false) Integer genreId,
+            @RequestParam(value = "year", required = false) Integer year) {
+        log.info("Запрос популярных фильмов: count={}, genreId={}, year={}", count, genreId, year);
+        return filmService.getPopularFilms(count, genreId, year);
     }
 }

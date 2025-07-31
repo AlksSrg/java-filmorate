@@ -98,4 +98,26 @@ public class FilmDbStorage implements FilmStorage {
 
         return genresByFilm;
     }
+
+    @Override
+    public Collection<Film> getFilteredFilms(Integer genreId, Integer year) {
+        StringBuilder sql = new StringBuilder("SELECT f.* FROM film f");
+        List<Object> params = new ArrayList<>();
+
+        if (genreId != null) {
+            sql.append(" JOIN film_genre fg ON f.film_id = fg.film_id WHERE fg.genre_id = ?");
+            params.add(genreId);
+        }
+
+        if (year != null) {
+            sql.append(genreId != null ? " AND" : " WHERE").append(" EXTRACT(YEAR FROM f.release_date) = ?");
+            params.add(year);
+        }
+
+        try {
+            return jdbcTemplate.query(sql.toString(), new FilmMapper(), params.toArray());
+        } catch (EmptyResultDataAccessException e) {
+            return Collections.emptyList();
+        }
+    }
 }

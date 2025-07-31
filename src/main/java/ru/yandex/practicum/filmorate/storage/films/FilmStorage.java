@@ -48,4 +48,13 @@ public interface FilmStorage {
      * @return набор жанров фильма
      */
     Set<Genre> getGenresByFilm(Long filmId);
+
+    /**
+     * Возвращает список фильм с фильтрацией по жанру и/или году
+     *
+     * @param genreId идентификатор жанра для фильтрации
+     * @param year год выпуска для фильтрации
+     * @return списка отфильтрованных фильмов
+     */
+    Collection<Film> getFilteredFilms(Integer genreId, Integer year);
 }

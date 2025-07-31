@@ -10,6 +10,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 /**
  * Реализация хранилища фильмов в памяти.
@@ -98,5 +99,26 @@ public class InMemoryFilmStorage implements FilmStorage {
     public TreeSet<Genre> getGenresByFilm(Long filmId) {
         // Тут временно возвращаем null, пока не будет полной реализации
         return null;
+    }
+
+    @Override
+    public Collection<Film> getFilteredFilms(Integer genreId, Integer year) {
+        Collection<Film> result = films.values();
+
+        if (genreId != null) {
+            result = result.stream()
+                    .filter(film -> film.getGenres() != null && film.getGenres().stream()
+                            .anyMatch(genre -> genre.getId().equals(genreId)))
+                    .collect(Collectors.toList());
+        }
+
+        if (year != null) {
+            result = result.stream()
+                    .filter(film -> film.getReleaseDate() != null &&
+                            film.getReleaseDate().getYear() == year)
+                    .collect(Collectors.toList());
+        }
+
+        return result;
     }
 }
