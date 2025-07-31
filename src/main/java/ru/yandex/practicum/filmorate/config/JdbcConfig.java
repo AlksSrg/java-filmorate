@@ -6,7 +6,6 @@ import org.springframework.jdbc.core.RowMapper;
 import ru.yandex.practicum.filmorate.dto.dtoclasses.GenreWithIdAndName;
 import ru.yandex.practicum.filmorate.dto.dtoclasses.MpaWithIdAndName;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.User;
 
 @Configuration
