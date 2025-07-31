@@ -99,4 +99,15 @@ public class InMemoryFilmStorage implements FilmStorage {
         // Тут временно возвращаем null, пока не будет полной реализации
         return null;
     }
+
+    /**
+     * Пустая реализация метода из интерфейса
+     *
+     * @param id идентификатор фильма
+     */
+    @Override
+    public void deleteById(long id) {
+        log.warn("Использование устаревшей реализации");
+        throw new UnsupportedOperationException("Метод не поддерживается в устаревшей реализации");
+    }
 }

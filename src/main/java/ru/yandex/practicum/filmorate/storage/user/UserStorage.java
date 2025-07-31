@@ -39,4 +39,11 @@ public interface UserStorage {
      * @return объект пользователя
      */
     User getUserById(Long id);
+
+    /**
+     * Удаляет пользователя по идентификатору
+     *
+     * @param id идентификатор пользователя
+     */
+    void deleteById(long id);
 }

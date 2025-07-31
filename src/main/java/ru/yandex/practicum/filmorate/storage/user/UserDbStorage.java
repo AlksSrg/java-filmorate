@@ -74,4 +74,11 @@ public class UserDbStorage implements UserStorage {
             throw new EntityNotFoundException(String.format("Пользователя с id %s не существует", id));
         }
     }
+
+    @Override
+    public void deleteById(long id) {
+        if (jdbcTemplate.update("DELETE FROM users WHERE user_id = ?", id) == 0) {
+            throw new EntityNotFoundException(String.format("Пользователя с id %s и так не существует", id));
+        }
+    }
 }

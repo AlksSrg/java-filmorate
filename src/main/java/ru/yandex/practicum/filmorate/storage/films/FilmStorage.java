@@ -48,4 +48,11 @@ public interface FilmStorage {
      * @return набор жанров фильма
      */
     Set<Genre> getGenresByFilm(Long filmId);
+
+    /**
+     * Удаляет фильм по идентификатору
+     *
+     * @param id идентификатор фильма
+     */
+    void deleteById(long id);
 }
