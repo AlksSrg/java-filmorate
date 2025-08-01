@@ -199,6 +199,45 @@ public class UserDbService {
      */
     public List<Film> getRecommendations(long id) {
         if (userStorage.getUserById(id) == null) {
+            throw new EntityNotFoundException(String.format("пользователь с id %d не зарегистрирован.", id));
+        } else {
+            log.info("Запрошены рекомендации для пользователя с id {}", id);
+            final Collection<Film> userFilms = filmService.getFilmsByUser(id);
+            long userId = 0;
+            long countCoincidences = 0;
+            for (User user : userStorage.getUsers()) {
+                if (user.getId() != id) {
+                    long count = 0;
+                    for (Film film : filmService.getFilmsByUser(user.getId())) {
+                        if (userFilms.contains(film)) {
+                            count++;
+                        }
+                    }
+                    if (count > countCoincidences) {
+                        userId = user.getId();
+                        countCoincidences = count;
+                    }
+                }
+            }
+            log.info("Рекомендации для пользователя с id {} успешно предоставлены", id);
+            return filmService.getFilmsByUser(userId).stream()
+                    .filter(film -> !userFilms.contains(film))
+                    .collect(Collectors.toList());
+        }
+    }
+
+
+
+    /**
+     * Метод предоставляет рекомендуемые фильмы для пользователя.
+     * Точность таргета зависит от активности пользователя.
+     *
+     * @param id id пользователя для которого запрашиваются рекомендации.
+     * @return возвращает список рекомендуемых фильмов или пустой список если таргет недостаточно обогащен.
+     * @throws EntityNotFoundException генерирует ошибку в случае если пользователь не зарегистрирован.
+     */
+    public List<Film> getRecommendations(long id) {
+        if (userStorage.getUserById(id) == null) {
             throw new EntityNotFoundException(String.format("Пользователь с id %d не зарегистрирован.", id));
         } else {
             log.info("Запрошены рекомендации для пользователя с id {}", id);
