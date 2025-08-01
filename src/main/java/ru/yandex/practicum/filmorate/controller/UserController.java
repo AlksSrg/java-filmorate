@@ -130,13 +130,13 @@ public class UserController {
     }
 
     /**
-     * УВозвращает список рекомендаций фильмов.
+     * Возвращает список рекомендаций фильмов.
      *
      * @param userId уникальный идентификатор фильма
      * @return список рекомендаций
      */
     @GetMapping("/{id}/recommendations")
-    public List<Film> getRecommendations(@PathVariable @Positive Long userId) {
+    public List<Film> getRecommendations(@PathVariable(value="id") @Positive Long userId) {
         return userService.getRecommendations(userId);
     }
 

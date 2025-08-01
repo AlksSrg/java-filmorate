@@ -199,7 +199,7 @@ public class UserDbService {
      */
     public List<Film> getRecommendations(long id) {
         if (userStorage.getUserById(id) == null) {
-            throw new EntityNotFoundException(String.format("пользователь с id %d не зарегистрирован.", id));
+            throw new EntityNotFoundException(String.format("Пользователь с id %d не зарегистрирован.", id));
         } else {
             log.info("Запрошены рекомендации для пользователя с id {}", id);
             final Collection<Film> userFilms = filmService.getFilmsByUser(id);
