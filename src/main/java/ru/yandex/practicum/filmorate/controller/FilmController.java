@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -112,5 +113,17 @@ public class FilmController {
             @RequestParam(value = "year", required = false) Integer year) {
         log.info("Запрос популярных фильмов: count={}, genreId={}, year={}", count, genreId, year);
         return filmService.getPopularFilms(count, genreId, year);
+    }
+
+    /**
+     * Удаление фильма по идентификатору.
+     *
+     * @param filmId уникальный идентификатор фильма
+     * @return пустой ответ с успешным статусом
+     */
+    @DeleteMapping("/{filmId}")
+    public ResponseEntity<Void> deleteFilmById(@PathVariable @Positive Long filmId) {
+        filmService.deleteFilmById(filmId);
+        return ResponseEntity.noContent().build();
     }
 }

@@ -57,4 +57,11 @@ public interface FilmStorage {
      * @return списка отфильтрованных фильмов
      */
     Collection<Film> getFilteredFilms(Integer genreId, Integer year);
+
+    /**
+     * Удаляет фильм по идентификатору
+     *
+     * @param id идентификатор фильма
+     */
+    void deleteById(long id);
 }

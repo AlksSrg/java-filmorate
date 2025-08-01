@@ -173,4 +173,13 @@ public class UserDbService {
         log.info("Запрошены все пользователи из базы данных.");
         return userStorage.getUsers();
     }
+
+    /**
+     * Удаление пользователя по id.
+     *
+     * @param id идентификатор пользователя
+     */
+    public void deleteUserById(long id) {
+        userStorage.deleteById(id);
+    }
 }

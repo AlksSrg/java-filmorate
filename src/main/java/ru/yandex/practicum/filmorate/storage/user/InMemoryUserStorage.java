@@ -91,4 +91,15 @@ public class InMemoryUserStorage implements UserStorage {
             throw new EntityNotFoundException(String.format("Пользователя с id %s не существует", id));
         }
     }
+
+    /**
+     * Пустая реализация метода из интерфейса
+     *
+     * @param id идентификатор пользователя
+     */
+    @Override
+    public void deleteById(long id) {
+        log.warn("Использование устаревшей реализации");
+        throw new UnsupportedOperationException("Метод не поддерживается в устаревшей реализации");
+    }
 }

@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -112,5 +113,17 @@ public class UserController {
     @GetMapping
     public ResponseEntity<Collection<User>> getUsers() {
         return ResponseEntity.ok(userService.getAllUsers());
+    }
+
+    /**
+     * Удаление пользователя по идентификатору.
+     *
+     * @param userId уникальный идентификатор фильма
+     * @return пустой ответ с успешным статусом
+     */
+    @DeleteMapping("/{userId}")
+    public ResponseEntity<Void> deleteUserById(@PathVariable @Positive Long userId) {
+        userService.deleteUserById(userId);
+        return ResponseEntity.noContent().build();
     }
 }
