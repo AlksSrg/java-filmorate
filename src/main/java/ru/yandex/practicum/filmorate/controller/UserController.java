@@ -136,7 +136,7 @@ public class UserController {
      * @return список рекомендаций
      */
     @GetMapping("/{id}/recommendations")
-    public List<Film> getRecommendations(@PathVariable(value="id") @Positive Long userId) {
+    public List<Film> getRecommendations(@PathVariable(value = "id") @Positive Long userId) {
         return userService.getRecommendations(userId);
     }
 
