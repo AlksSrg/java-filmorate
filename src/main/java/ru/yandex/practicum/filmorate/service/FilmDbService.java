@@ -77,12 +77,17 @@ public class FilmDbService {
      * @return список популярных фильмов
      */
     public List<Film> getPopularFilms(int topNumber, Integer genreId, Integer year) {
+        if (topNumber <= 0) {
+            throw new IllegalArgumentException("Количество фильмов должно быть больше 0");
+        }
+
         List<Film> films = new ArrayList<>(filmStorage.getFilteredFilms(genreId, year));
         return films.stream()
                 .sorted(Comparator.comparingInt((Film film) -> {
-                    int likes = likeDao.checkLikes((film.getId()));
-                    return likes < 0 ? Integer.MAX_VALUE : likes;
-                }).reversed())
+                            int likes = likeDao.checkLikes(film.getId());
+                            return likes < 0 ? 0 : likes;
+                        }).reversed()
+                        .thenComparing(Film::getReleaseDate, Comparator.reverseOrder()))
                 .limit(topNumber)
                 .peek(this::enrichFilmWithDetails)
                 .collect(Collectors.toList());
