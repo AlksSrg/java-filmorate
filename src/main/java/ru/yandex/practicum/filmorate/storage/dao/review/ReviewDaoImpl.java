@@ -76,18 +76,33 @@ public class ReviewDaoImpl implements ReviewDao {
 
     @Override
     public void addLike(Long reviewId, Long userId) {
-        String sql = "INSERT INTO review_likes (review_id, user_id, is_like) VALUES (?, ?, true) " +
-                     "ON CONFLICT (review_id, user_id) DO UPDATE SET is_like = true";
-        jdbcTemplate.update(sql, reviewId, userId);
+
+        String checkSql = "SELECT COUNT(*) FROM review_likes WHERE review_id = ? AND user_id = ?";
+        int count = jdbcTemplate.queryForObject(checkSql, Integer.class, reviewId, userId);
+
+        if (count > 0) {
+            String updateSql = "UPDATE review_likes SET is_like = true WHERE review_id = ? AND user_id = ?";
+            jdbcTemplate.update(updateSql, reviewId, userId);
+        } else {
+            String insertSql = "INSERT INTO review_likes (review_id, user_id, is_like) VALUES (?, ?, true)";
+            jdbcTemplate.update(insertSql, reviewId, userId);
+        }
         updateUseful(reviewId);
     }
 
     @Override
     public void addDislike(Long reviewId, Long userId) {
-        String sql =
-            "INSERT INTO review_likes (review_id, user_id, is_like) VALUES (?, ?, false) " +
-            "ON CONFLICT (review_id, user_id) DO UPDATE SET is_like = false";
-        jdbcTemplate.update(sql, reviewId, userId);
+
+        String checkSql = "SELECT COUNT(*) FROM review_likes WHERE review_id = ? AND user_id = ?";
+        int count = jdbcTemplate.queryForObject(checkSql, Integer.class, reviewId, userId);
+
+        if (count > 0) {
+            String updateSql = "UPDATE review_likes SET is_like = false WHERE review_id = ? AND user_id = ?";
+            jdbcTemplate.update(updateSql, reviewId, userId);
+        } else {
+            String insertSql = "INSERT INTO review_likes (review_id, user_id, is_like) VALUES (?, ?, false)";
+            jdbcTemplate.update(insertSql, reviewId, userId);
+        }
         updateUseful(reviewId);
     }
 
