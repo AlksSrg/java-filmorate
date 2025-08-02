@@ -88,8 +88,8 @@ public class FilmDbStorage implements FilmStorage {
     public Set<Genre> getGenresByFilm(Long filmId) {
         List<Genre> genresList = jdbcTemplate.query(
                 "SELECT f.genre_id, g.genre_name FROM film_genre AS f " +
-                        "LEFT OUTER JOIN genre AS g ON f.genre_id = g.genre_id " +
-                        "WHERE f.film_id=? ORDER BY g.genre_id",
+                "LEFT OUTER JOIN genre AS g ON f.genre_id = g.genre_id " +
+                "WHERE f.film_id=? ORDER BY g.genre_id",
                 new GenreMapper(),
                 filmId
         );
@@ -140,7 +140,30 @@ public class FilmDbStorage implements FilmStorage {
     public List<Film> getFilmsByIds(Set<Long> filmIds) {
         if (filmIds.isEmpty()) return Collections.emptyList();
         String sql = "SELECT * FROM film WHERE film_id IN (" +
-                filmIds.stream().map(String::valueOf).collect(Collectors.joining(",")) + ")";
+                     filmIds.stream().map(String::valueOf).collect(Collectors.joining(",")) + ")";
         return jdbcTemplate.query(sql, new FilmMapper());
     }
+
+    @Override
+    public Collection<Film> getFilmsByDirector(Long directorId, String sortBy) {
+        String sql;
+        if (sortBy.equals("year")) {
+            sql = """
+                    SELECT f.* FROM film f
+                    WHERE f.film_id IN (SELECT film_id FROM film_director WHERE director_id = ?)
+                    ORDER BY EXTRACT(YEAR FROM f.release_date)""";
+        } else if (sortBy.equals("likes")) {
+            sql = """
+                    SELECT f.* FROM film f
+                    INNER JOIN film_director fd ON f.film_id = fd.film_id
+                    LEFT JOIN (SELECT film_id, COUNT(user_id) AS user_likes FROM likes
+                    GROUP BY film_id ORDER BY user_likes DESC) AS l ON f.film_id = l.film_id
+                    WHERE fd.director_id = ?
+                    ORDER BY l.user_likes DESC""";
+        } else {
+            return new ArrayList<>();
+        }
+        return jdbcTemplate.query(sql, new FilmMapper(), directorId);
+    }
+
 }

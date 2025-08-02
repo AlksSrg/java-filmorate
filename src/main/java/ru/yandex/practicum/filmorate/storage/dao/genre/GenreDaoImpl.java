@@ -9,6 +9,7 @@ import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.mapper.GenreMapper;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @AllArgsConstructor
 @Component
@@ -65,5 +66,27 @@ public class GenreDaoImpl implements GenreDao {
         genresByFilm.addAll(genresList);
 
         return genresByFilm;
+    }
+
+    @Override
+    public Map<Long, Set<Genre>> getGenresMapByFilms(Set<Long> filmIds) {
+        String sql = """
+                SELECT fg.film_id, g.genre_id, g.genre_name
+                FROM film_genre fg
+                JOIN genre g ON fg.genre_id = g.genre_id
+                WHERE fg.film_id IN (%s)""".formatted(filmIds.stream().map(id -> "?")
+                .collect(Collectors.joining(", ")));
+        return jdbcTemplate.query(sql, filmIds.toArray(), (rs) -> {
+            Map<Long, Set<Genre>> genreMap = new HashMap<>();
+            while (rs.next()) {
+                Genre genre = new Genre();
+                genre.setId(rs.getInt("genre_id"));
+                genre.setName(rs.getString("genre_name"));
+
+                Long filmId = rs.getLong("film_id");
+                genreMap.computeIfAbsent(filmId, k -> new HashSet<>()).add(genre);
+            }
+            return genreMap;
+        });
     }
 }

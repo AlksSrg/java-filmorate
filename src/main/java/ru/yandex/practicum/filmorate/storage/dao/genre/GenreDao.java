@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.storage.dao.genre;
 
 import ru.yandex.practicum.filmorate.model.Genre;
 
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -47,4 +48,6 @@ public interface GenreDao {
      * @return набор жанров фильма
      */
     Set<Genre> getGenresByFilm(Long filmId);
+
+    Map<Long, Set<Genre>> getGenresMapByFilms(Set<Long> filmIds);
 }

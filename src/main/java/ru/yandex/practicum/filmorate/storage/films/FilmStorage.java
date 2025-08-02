@@ -81,4 +81,6 @@ public interface FilmStorage {
      * @return список найденных фильмов
      */
     List<Film> getFilmsByIds(Set<Long> filmIds);
+
+    Collection<Film> getFilmsByDirector(Long directorId, String sortBy);
 }

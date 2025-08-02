@@ -34,7 +34,6 @@ public class Film {
     /**
      * Дата выпуска фильма, значение должно быть не ранее 28 декабря 1895 года.
      */
-    @Past(message = "Дата релиза должна быть позже или равна 28 декабря 1895 года")
     private LocalDate releaseDate;
 
     /**
@@ -53,6 +52,8 @@ public class Film {
      */
     @NotNull
     private Mpa mpa;
+
+    private Set<Director> directors;
 
     /**
      * Конструктор для инициализации объекта фильма основными полями.

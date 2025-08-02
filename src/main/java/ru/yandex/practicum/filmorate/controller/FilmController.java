@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -73,7 +74,7 @@ public class FilmController {
      */
     @DeleteMapping("/{film_id}/like/{id}")
     public ResponseEntity<Void> deleteLikeFilm(@PathVariable("film_id") Long filmId, @PathVariable("id") Long userId) {
-        filmService.deleteLikeFilm(filmId, userId);
+        filmService.deleteLike(filmId, userId);
         log.info("У фильма с id={} удален лайк от пользователя id={}", filmId, userId);
         return ResponseEntity.noContent().build();
     }
@@ -142,5 +143,18 @@ public class FilmController {
         log.info("Запрос общих фильмов для пользователей {} и {}", userId, friendId);
         List<Film> commonFilms = filmService.getCommonFilms(userId, friendId);
         return ResponseEntity.ok(commonFilms);
+    }
+
+    /**
+     * Список фильмов режиссера отсортированных по количеству лайков или году выпуска.
+     *
+     * @param directorId уникальный идентификатор режиссера
+     * @param sortBy     сортировка по лайкам(likes) или году выпуска(year)
+     * @return список отсортированных фильмов
+     */
+    @GetMapping("/director/{directorId}")
+    public Collection<Film> getFilmsByDirector(@PathVariable @Positive Long directorId,
+                                               @RequestParam @NotNull String sortBy) {
+        return filmService.getFilmsByDirector(directorId, sortBy);
     }
 }
