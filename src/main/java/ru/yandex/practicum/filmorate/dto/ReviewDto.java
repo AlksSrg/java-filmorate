@@ -10,6 +10,7 @@ import lombok.Data;
  */
 @Data
 public class ReviewDto {
+    private Long reviewId;  // Добавьте это поле
 
     @NotBlank(message = "Содержание отзыва не может быть пустым")
     private String content;

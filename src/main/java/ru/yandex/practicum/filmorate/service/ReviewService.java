@@ -32,12 +32,12 @@ public class ReviewService {
     }
 
     public Review update(Review review) {
-        getById(review.getReviewId()); // проверяем существование
+        getById(review.getReviewId());
         return reviewDao.update(review);
     }
 
     public void delete(Long id) {
-        getById(id); // проверяем существование
+        getById(id);
         reviewDao.delete(id);
     }
 
@@ -48,7 +48,7 @@ public class ReviewService {
 
     public List<Review> getByFilmId(Long filmId, int count) {
         if (filmId != null) {
-            filmStorage.getFilmById(filmId); // проверяем существование фильма
+            filmStorage.getFilmById(filmId);
         }
         return filmId == null ?
             reviewDao.findAll(count) :
