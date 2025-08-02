@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Length;
 
 import java.time.LocalDate;
-import java.util.HashSet;
+import java.util.Set;
 
 @Data
 @NoArgsConstructor
@@ -46,7 +46,7 @@ public class Film {
     /**
      * Набор жанров, к которым относится фильм.
      */
-    private HashSet<Genre> genres;
+    private Set<Genre> genres;
 
     /**
      * Рейтинг MPA фильма, обязательное поле.

@@ -13,10 +13,7 @@ import ru.yandex.practicum.filmorate.storage.films.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 import ru.yandex.practicum.filmorate.utils.ValidationUtils;
 
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -75,15 +72,24 @@ public class FilmDbService {
      * Возвращает список популярных фильмов, отсортированных по количеству лайков.
      *
      * @param topNumber количество фильмов для отображения
+     * @param genreId идентификатор жанра для фильтрации
+     * @param year год выпуска фильма для фильтрации
      * @return список популярных фильмов
      */
-    public List<Film> getPopularFilms(int topNumber) {
-        return getFilms().stream()
+    public List<Film> getPopularFilms(int topNumber, Integer genreId, Integer year) {
+        if (topNumber <= 0) {
+            throw new IllegalArgumentException("Количество фильмов должно быть больше 0");
+        }
+
+        List<Film> films = new ArrayList<>(filmStorage.getFilteredFilms(genreId, year));
+        return films.stream()
                 .sorted(Comparator.comparingInt((Film film) -> {
-                    int likes = likeDao.checkLikes(film.getId());
-                    return likes < 0 ? Integer.MAX_VALUE : likes; // Негативные значения считаем большими
-                }).reversed())
+                            int likes = likeDao.checkLikes(film.getId());
+                            return likes < 0 ? 0 : likes;
+                        }).reversed()
+                        .thenComparing(Film::getReleaseDate, Comparator.reverseOrder()))
                 .limit(topNumber)
+                .peek(this::enrichFilmWithDetails)
                 .collect(Collectors.toList());
     }
 
@@ -194,5 +200,20 @@ public class FilmDbService {
      */
     public void deleteFilmById(long id) {
         filmStorage.deleteById(id);
+    }
+
+    /**
+     * Метод предоставляет список фильмов которые понравились пользователю.
+     *
+     * @param id id пользователя для которого выгружаются понравившиеся фильмы.
+     * @return возвращает список понравившихся фильмов.
+     */
+    public Collection<Film> getFilmsByUser(Long id) {
+        Collection<Film> films = filmStorage.getFilmsByUser(id);
+        for (Film film : films) {
+            film.setGenres(filmStorage.getGenresByFilm(film.getId()));
+            film.setMpa(mpaDao.getMpaById(film.getMpa().getId()));
+        }
+        return films;
     }
 }

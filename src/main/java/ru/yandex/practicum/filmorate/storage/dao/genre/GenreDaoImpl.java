@@ -33,7 +33,7 @@ public class GenreDaoImpl implements GenreDao {
     }
 
     @Override
-    public void addGenres(Long filmId, HashSet<Genre> genres) {
+    public void addGenres(Long filmId, Set<Genre> genres) {
         if (genres != null) {
             for (Genre genre : genres) {
                 jdbcTemplate.update("INSERT INTO film_genre (film_id, genre_id) VALUES (?, ?)", filmId, genre.getId());
@@ -46,7 +46,7 @@ public class GenreDaoImpl implements GenreDao {
     }
 
     @Override
-    public void updateGenres(Long filmId, HashSet<Genre> genres) {
+    public void updateGenres(Long filmId, Set<Genre> genres) {
         deleteGenres(filmId);
         if (genres != null) {
             addGenres(filmId, genres);

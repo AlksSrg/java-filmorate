@@ -39,7 +39,7 @@ public class MpaDbService {
     /**
      * Возвращает список всех рейтингов MPA.
      *
-     * @return коллекция рейтингов MPAA
+     * @return коллекция рейтингов MPA
      */
     public Collection<Mpa> getListMpa() {
         return mpaDao.getListMpa();

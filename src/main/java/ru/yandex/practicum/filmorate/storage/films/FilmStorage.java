@@ -55,4 +55,21 @@ public interface FilmStorage {
      * @param id идентификатор фильма
      */
     void deleteById(long id);
+
+    /**
+     * Метод предоставляет список фильмов которые понравились пользователю.
+     *
+     * @param id id пользователя для которого выгружаются понравившиеся фильмы.
+     * @return возвращает список понравившихся фильмов.
+     */
+    Collection<Film> getFilmsByUser(Long id);
+
+    /**
+     * Возвращает список фильм с фильтрацией по жанру и/или году
+     *
+     * @param genreId идентификатор жанра для фильтрации
+     * @param year год выпуска для фильтрации
+     * @return списка отфильтрованных фильмов
+     */
+    Collection<Film> getFilteredFilms(Integer genreId, Integer year);
 }
