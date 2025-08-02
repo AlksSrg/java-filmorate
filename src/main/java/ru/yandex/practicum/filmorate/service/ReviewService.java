@@ -4,6 +4,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
+import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.storage.films.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.review.ReviewDao;
@@ -27,7 +28,27 @@ public class ReviewService {
     }
 
     public Review create(Review review) {
-        validateUserAndFilm(review.getUserId(), review.getFilmId());
+
+        if (review.getContent() == null || review.getContent().isBlank()) {
+            throw new ValidationException("Содержание отзыва не может быть пустым");
+        }
+        if (review.getIsPositive() == null) {
+            throw new ValidationException("Тип отзыва не может быть null");
+        }
+        if (review.getUserId() == null) {
+            throw new ValidationException("ID пользователя не может быть null");
+        }
+        if (review.getFilmId() == null) {
+            throw new ValidationException("ID фильма не может быть null");
+        }
+
+        try {
+            userStorage.getUserById(review.getUserId());
+            filmStorage.getFilmById(review.getFilmId());
+        } catch (EntityNotFoundException e) {
+            throw new ValidationException(e.getMessage());
+        }
+
         return reviewDao.create(review);
     }
 

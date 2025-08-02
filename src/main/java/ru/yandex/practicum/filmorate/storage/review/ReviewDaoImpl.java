@@ -76,17 +76,14 @@ public class ReviewDaoImpl implements ReviewDao {
 
     @Override
     public void addLike(Long reviewId, Long userId) {
-        String sql = "INSERT INTO review_likes (review_id, user_id, is_like) VALUES (?, ?, true) " +
-                     "ON CONFLICT (review_id, user_id) DO UPDATE SET is_like = true";
+        String sql = "MERGE INTO review_likes (review_id, user_id, is_like) VALUES (?, ?, true)";
         jdbcTemplate.update(sql, reviewId, userId);
         updateUseful(reviewId);
     }
 
     @Override
     public void addDislike(Long reviewId, Long userId) {
-        String sql =
-            "INSERT INTO review_likes (review_id, user_id, is_like) VALUES (?, ?, false) " +
-            "ON CONFLICT (review_id, user_id) DO UPDATE SET is_like = false";
+        String sql = "MERGE INTO review_likes (review_id, user_id, is_like) VALUES (?, ?, false)";
         jdbcTemplate.update(sql, reviewId, userId);
         updateUseful(reviewId);
     }

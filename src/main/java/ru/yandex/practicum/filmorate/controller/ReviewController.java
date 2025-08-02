@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ru.yandex.practicum.filmorate.dto.ReviewDto;
+import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.mapper.ReviewMapper;
 import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.service.ReviewService;
@@ -40,7 +41,11 @@ public class ReviewController {
 
     @PutMapping
     public Review update(@Valid @RequestBody ReviewDto reviewDto) {
-        return reviewService.update(reviewMapper.toReview(reviewDto));
+        Review review = reviewMapper.toReview(reviewDto);
+        if (review.getReviewId() == null) {
+            throw new ValidationException("ID отзыва не может быть null");
+        }
+        return reviewService.update(review);
     }
 
     @DeleteMapping("/{id}")
