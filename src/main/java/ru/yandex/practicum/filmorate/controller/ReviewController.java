@@ -13,15 +13,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ru.yandex.practicum.filmorate.dto.ReviewDto;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.mapper.ReviewMapper;
 import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.service.ReviewService;
 
 /**
- * Контроллер для управления отзывами на фильмы.
- * Обрабатывает HTTP-запросы для создания, обновления, удаления и получения отзывов,
- * а также для управления лайками и дизлайками отзывов.
+ * Контроллер для работы с отзывами.
  */
 @RestController
 @RequestMapping("/reviews")
@@ -36,12 +33,6 @@ public class ReviewController {
         this.reviewMapper = reviewMapper;
     }
 
-    /**
-     * Создает новый отзыв.
-     *
-     * @param reviewDto DTO с данными отзыва
-     * @return созданный отзыв
-     */
     @PostMapping
     public Review create(@Valid @RequestBody ReviewDto reviewDto) {
         return reviewService.create(reviewMapper.toReview(reviewDto));
@@ -49,18 +40,9 @@ public class ReviewController {
 
     @PutMapping
     public Review update(@Valid @RequestBody ReviewDto reviewDto) {
-        Review review = reviewMapper.toReview(reviewDto);
-        if (review.getReviewId() == null) {
-            throw new ValidationException("ID отзыва не может быть null");
-        }
-        return reviewService.update(review);
+        return reviewService.update(reviewMapper.toReview(reviewDto));
     }
 
-    /**
-     * Удаляет отзыв по идентификатору.
-     *
-     * @param id идентификатор отзыва
-     */
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id) {
         reviewService.delete(id);
@@ -71,13 +53,6 @@ public class ReviewController {
         return reviewService.getById(id);
     }
 
-    /**
-     * Получает список отзывов для указанного фильма или все отзывы, если фильм не указан.
-     *
-     * @param filmId идентификатор фильма (опционально)
-     * @param count  количество возвращаемых отзывов (по умолчанию 10)
-     * @return список отзывов, отсортированных по полезности
-     */
     @GetMapping
     public List<Review> getByFilmId(
         @RequestParam(required = false) Long filmId,
@@ -85,45 +60,21 @@ public class ReviewController {
         return reviewService.getByFilmId(filmId, count);
     }
 
-    /**
-     * Добавляет лайк отзыву от пользователя.
-     *
-     * @param id     идентификатор отзыва
-     * @param userId идентификатор пользователя
-     */
     @PutMapping("/{id}/like/{userId}")
     public void addLike(@PathVariable Long id, @PathVariable Long userId) {
         reviewService.addLike(id, userId);
     }
 
-    /**
-     * Добавляет дизлайк отзыву от пользователя.
-     *
-     * @param id     идентификатор отзыва
-     * @param userId идентификатор пользователя
-     */
     @PutMapping("/{id}/dislike/{userId}")
     public void addDislike(@PathVariable Long id, @PathVariable Long userId) {
         reviewService.addDislike(id, userId);
     }
 
-    /**
-     * Удаляет лайк/дизлайк отзыва от пользователя.
-     *
-     * @param id     идентификатор отзыва
-     * @param userId идентификатор пользователя
-     */
     @DeleteMapping("/{id}/like/{userId}")
     public void removeLike(@PathVariable Long id, @PathVariable Long userId) {
         reviewService.removeLike(id, userId);
     }
 
-    /**
-     * Удаляет дизлайк отзыва от пользователя.
-     *
-     * @param id     идентификатор отзыва
-     * @param userId идентификатор пользователя
-     */
     @DeleteMapping("/{id}/dislike/{userId}")
     public void removeDislike(@PathVariable Long id, @PathVariable Long userId) {
         reviewService.removeDislike(id, userId);
