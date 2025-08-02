@@ -192,4 +192,28 @@ public class FilmDbService {
             throw new EntityNotFoundException("Пользователь с таким Id не существует");
         }
     }
+
+    /**
+     * Удаление фильма по id.
+     *
+     * @param id идентификатор фильма
+     */
+    public void deleteFilmById(long id) {
+        filmStorage.deleteById(id);
+    }
+
+    /**
+     * Метод предоставляет список фильмов которые понравились пользователю.
+     *
+     * @param id id пользователя для которого выгружаются понравившиеся фильмы.
+     * @return возвращает список понравившихся фильмов.
+     */
+    public Collection<Film> getFilmsByUser(Long id) {
+        Collection<Film> films = filmStorage.getFilmsByUser(id);
+        for (Film film : films) {
+            film.setGenres(filmStorage.getGenresByFilm(film.getId()));
+            film.setMpa(mpaDao.getMpaById(film.getMpa().getId()));
+        }
+        return films;
+    }
 }

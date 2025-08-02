@@ -1,13 +1,16 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserDbService;
 
 import java.util.Collection;
+import java.util.List;
 
 /**
  * Класс-контроллер для создания и редактирования пользователей
@@ -113,4 +116,28 @@ public class UserController {
     public ResponseEntity<Collection<User>> getUsers() {
         return ResponseEntity.ok(userService.getAllUsers());
     }
+
+    /**
+     * Удаление пользователя по идентификатору.
+     *
+     * @param userId уникальный идентификатор фильма
+     * @return пустой ответ с успешным статусом
+     */
+    @DeleteMapping("/{userId}")
+    public ResponseEntity<Void> deleteUserById(@PathVariable @Positive Long userId) {
+        userService.deleteUserById(userId);
+        return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * Возвращает список рекомендаций фильмов.
+     *
+     * @param userId уникальный идентификатор фильма
+     * @return список рекомендаций
+     */
+    @GetMapping("/{id}/recommendations")
+    public List<Film> getRecommendations(@PathVariable(value = "id") @Positive Long userId) {
+        return userService.getRecommendations(userId);
+    }
+
 }

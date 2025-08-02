@@ -100,6 +100,20 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
+    public void deleteById(long id) {
+        if (jdbcTemplate.update("DELETE FROM film WHERE film_id = ?", id) == 0) {
+            throw new EntityNotFoundException(String.format("Фильма с id %s и так не существует", id));
+        }
+    }
+
+    @Override
+    public Collection<Film> getFilmsByUser(Long id) {
+        return jdbcTemplate
+                .query("SELECT * FROM film WHERE film_id IN (SELECT film_id FROM likes WHERE user_id = ?)",
+                        new FilmMapper(), id);
+    }
+
+    @Override
     public Collection<Film> getFilteredFilms(Integer genreId, Integer year) {
         StringBuilder sql = new StringBuilder("SELECT f.* FROM film f");
         List<Object> params = new ArrayList<>();

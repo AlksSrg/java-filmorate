@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate.storage.dao.genre;
 
 import ru.yandex.practicum.filmorate.model.Genre;
 
-import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -31,7 +30,7 @@ public interface GenreDao {
      * @param filmId идентификатор фильма
      * @param genres набор новых жанров
      */
-    void addGenres(Long filmId, HashSet<Genre> genres);
+    void addGenres(Long filmId, Set<Genre> genres);
 
     /**
      * Обновляет существующие жанры фильма новой коллекцией.
@@ -39,7 +38,7 @@ public interface GenreDao {
      * @param filmId идентификатор фильма
      * @param genres новая коллекция жанров
      */
-    void updateGenres(Long filmId, HashSet<Genre> genres);
+    void updateGenres(Long filmId, Set<Genre> genres);
 
     /**
      * Возвращает жанры, присвоенные определенному фильму.
