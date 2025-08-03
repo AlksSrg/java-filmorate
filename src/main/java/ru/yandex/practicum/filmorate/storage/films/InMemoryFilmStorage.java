@@ -6,11 +6,8 @@ import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
-import java.util.Set;
 
 /**
  * Реализация хранилища фильмов в памяти.
@@ -139,5 +136,22 @@ public class InMemoryFilmStorage implements FilmStorage {
         }
 
         return result;
+    }
+
+    /**
+     * Возвращает список фильмов по их идентификаторам.
+     *
+     * @param filmIds набор идентификаторов фильмов
+     * @return список найденных фильмов или пустой список, если ничего не найдено
+     */
+    @Override
+    public List<Film> getFilmsByIds(Set<Long> filmIds) {
+        if (filmIds == null || filmIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        return films.values().stream()
+                .filter(film -> filmIds.contains(film.getId()))
+                .collect(Collectors.toList());
     }
 }

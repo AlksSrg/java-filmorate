@@ -11,12 +11,11 @@ import ru.yandex.practicum.filmorate.storage.dao.friends.FriendDao;
 import ru.yandex.practicum.filmorate.storage.dao.genre.GenreDao;
 import ru.yandex.practicum.filmorate.storage.dao.like.LikeDao;
 import ru.yandex.practicum.filmorate.storage.dao.mpa.MpaDao;
+import ru.yandex.practicum.filmorate.storage.films.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 import ru.yandex.practicum.filmorate.utils.ValidationUtils;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -52,6 +51,10 @@ public class UserDbService {
      * Поле для доступа к операциям с фильмами
      */
     private final FilmDbService filmService;
+    /**
+     * Поле для доступа к операциям с фильмами
+     */
+    private final FilmStorage filmStorage;
 
     /**
      * Регистрирует нового пользователя.
@@ -198,31 +201,37 @@ public class UserDbService {
      * @throws EntityNotFoundException генерирует ошибку в случае если пользователь не зарегистрирован.
      */
     public List<Film> getRecommendations(long id) {
-        if (userStorage.getUserById(id) == null) {
-            throw new EntityNotFoundException(String.format("пользователь с id %d не зарегистрирован.", id));
-        } else {
-            log.info("Запрошены рекомендации для пользователя с id {}", id);
-            final Collection<Film> userFilms = filmService.getFilmsByUser(id);
-            long userId = 0;
-            long countCoincidences = 0;
-            for (User user : userStorage.getUsers()) {
-                if (user.getId() != id) {
-                    long count = 0;
-                    for (Film film : filmService.getFilmsByUser(user.getId())) {
-                        if (userFilms.contains(film)) {
-                            count++;
-                        }
-                    }
-                    if (count > countCoincidences) {
-                        userId = user.getId();
-                        countCoincidences = count;
-                    }
-                }
-            }
-            log.info("Рекомендации для пользователя с id {} успешно предоставлены", id);
-            return filmService.getFilmsByUser(userId).stream()
-                    .filter(film -> !userFilms.contains(film))
-                    .collect(Collectors.toList());
+        User user = userStorage.getUserById(id);
+        if (user == null) {
+            throw new EntityNotFoundException("Пользователь не найден");
         }
+
+        Map<Long, Set<Long>> likesMap = likeDao.getAllLikesMap();
+        Set<Long> userLikes = likesMap.getOrDefault(id, Collections.emptySet());
+
+        // Если у пользователя нет лайков - возвращаем пустой список
+        if (userLikes.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        // Находим пользователя с максимальным пересечением лайков
+        Optional<Map.Entry<Long, Set<Long>>> bestMatch = likesMap.entrySet().stream()
+                .filter(e -> !e.getKey().equals(id)) // Исключаем текущего пользователя
+                .filter(e -> !Collections.disjoint(e.getValue(), userLikes)) // Только с пересекающимися лайками
+                .max(Comparator.comparingInt(e -> {
+                    Set<Long> intersection = new HashSet<>(e.getValue());
+                    intersection.retainAll(userLikes);
+                    return intersection.size();
+                }));
+
+        // Если нет пользователей с пересекающимися лайками - возвращаем пустой список
+        if (bestMatch.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        Set<Long> recommendations = new HashSet<>(bestMatch.get().getValue());
+        recommendations.removeAll(userLikes);
+
+        return filmStorage.getFilmsByIds(recommendations);
     }
 }

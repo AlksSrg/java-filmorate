@@ -4,6 +4,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -68,8 +69,16 @@ public interface FilmStorage {
      * Возвращает список фильм с фильтрацией по жанру и/или году
      *
      * @param genreId идентификатор жанра для фильтрации
-     * @param year год выпуска для фильтрации
+     * @param year    год выпуска для фильтрации
      * @return списка отфильтрованных фильмов
      */
     Collection<Film> getFilteredFilms(Integer genreId, Integer year);
+
+    /**
+     * Возвращает список фильмов по их идентификаторам.
+     *
+     * @param filmIds набор идентификаторов фильмов
+     * @return список найденных фильмов
+     */
+    List<Film> getFilmsByIds(Set<Long> filmIds);
 }

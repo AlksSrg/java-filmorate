@@ -18,6 +18,7 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component("FilmDbStorage")
@@ -133,5 +134,13 @@ public class FilmDbStorage implements FilmStorage {
         } catch (EmptyResultDataAccessException e) {
             return Collections.emptyList();
         }
+    }
+
+    @Override
+    public List<Film> getFilmsByIds(Set<Long> filmIds) {
+        if (filmIds.isEmpty()) return Collections.emptyList();
+        String sql = "SELECT * FROM film WHERE film_id IN (" +
+                filmIds.stream().map(String::valueOf).collect(Collectors.joining(",")) + ")";
+        return jdbcTemplate.query(sql, new FilmMapper());
     }
 }
