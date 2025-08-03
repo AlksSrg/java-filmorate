@@ -18,6 +18,7 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component("FilmDbStorage")
@@ -87,8 +88,8 @@ public class FilmDbStorage implements FilmStorage {
     public Set<Genre> getGenresByFilm(Long filmId) {
         List<Genre> genresList = jdbcTemplate.query(
                 "SELECT f.genre_id, g.genre_name FROM film_genre AS f " +
-                "LEFT OUTER JOIN genre AS g ON f.genre_id = g.genre_id " +
-                "WHERE f.film_id=? ORDER BY g.genre_id",
+                        "LEFT OUTER JOIN genre AS g ON f.genre_id = g.genre_id " +
+                        "WHERE f.film_id=? ORDER BY g.genre_id",
                 new GenreMapper(),
                 filmId
         );
@@ -97,6 +98,20 @@ public class FilmDbStorage implements FilmStorage {
         genresByFilm.addAll(genresList);
 
         return genresByFilm;
+    }
+
+    @Override
+    public void deleteById(long id) {
+        if (jdbcTemplate.update("DELETE FROM film WHERE film_id = ?", id) == 0) {
+            throw new EntityNotFoundException(String.format("Фильма с id %s и так не существует", id));
+        }
+    }
+
+    @Override
+    public Collection<Film> getFilmsByUser(Long id) {
+        return jdbcTemplate
+                .query("SELECT * FROM film WHERE film_id IN (SELECT film_id FROM likes WHERE user_id = ?)",
+                        new FilmMapper(), id);
     }
 
     @Override
@@ -122,9 +137,10 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public void deleteById(long id) {
-        if (jdbcTemplate.update("DELETE FROM film WHERE film_id = ?", id) == 0) {
-            throw new EntityNotFoundException(String.format("Фильма с id %s и так не существует", id));
-        }
+    public List<Film> getFilmsByIds(Set<Long> filmIds) {
+        if (filmIds.isEmpty()) return Collections.emptyList();
+        String sql = "SELECT * FROM film WHERE film_id IN (" +
+                filmIds.stream().map(String::valueOf).collect(Collectors.joining(",")) + ")";
+        return jdbcTemplate.query(sql, new FilmMapper());
     }
 }

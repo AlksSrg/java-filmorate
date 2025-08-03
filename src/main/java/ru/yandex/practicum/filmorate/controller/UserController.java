@@ -5,10 +5,12 @@ import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserDbService;
 
 import java.util.Collection;
+import java.util.List;
 
 /**
  * Класс-контроллер для создания и редактирования пользователей
@@ -126,4 +128,16 @@ public class UserController {
         userService.deleteUserById(userId);
         return ResponseEntity.noContent().build();
     }
+
+    /**
+     * Возвращает список рекомендаций фильмов.
+     *
+     * @param userId уникальный идентификатор фильма
+     * @return список рекомендаций
+     */
+    @GetMapping("/{id}/recommendations")
+    public List<Film> getRecommendations(@PathVariable(value = "id") @Positive Long userId) {
+        return userService.getRecommendations(userId);
+    }
+
 }

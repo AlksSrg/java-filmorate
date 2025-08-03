@@ -6,10 +6,7 @@ import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -93,11 +90,31 @@ public class InMemoryFilmStorage implements FilmStorage {
      * Возврат набора жанров для фильма (метод заглушка).
      *
      * @param filmId идентификатор фильма
-     * @return временный объект TreeSet<Genre>
+     * @return временный объект Set<Genre>
      */
     @Override
-    public TreeSet<Genre> getGenresByFilm(Long filmId) {
+    public Set<Genre> getGenresByFilm(Long filmId) {
         // Тут временно возвращаем null, пока не будет полной реализации
+        return null;
+    }
+
+
+    /**
+     * Пустая реализация метода из интерфейса
+     *
+     * @param id идентификатор фильма
+     */
+    @Override
+    public void deleteById(long id) {
+        log.warn("Использование устаревшей реализации");
+        throw new UnsupportedOperationException("Метод не поддерживается в устаревшей реализации");
+    }
+
+    /**
+     * Метод заглушка для неактуальной реализации.
+     */
+    @Override
+    public Collection<Film> getFilmsByUser(Long id) {
         return null;
     }
 
@@ -123,13 +140,19 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     /**
-     * Пустая реализация метода из интерфейса
+     * Возвращает список фильмов по их идентификаторам.
      *
-     * @param id идентификатор фильма
+     * @param filmIds набор идентификаторов фильмов
+     * @return список найденных фильмов или пустой список, если ничего не найдено
      */
     @Override
-    public void deleteById(long id) {
-        log.warn("Использование устаревшей реализации");
-        throw new UnsupportedOperationException("Метод не поддерживается в устаревшей реализации");
+    public List<Film> getFilmsByIds(Set<Long> filmIds) {
+        if (filmIds == null || filmIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        return films.values().stream()
+                .filter(film -> filmIds.contains(film.getId()))
+                .collect(Collectors.toList());
     }
 }

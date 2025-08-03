@@ -7,6 +7,11 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 @AllArgsConstructor
 @Component
 public class LikeDaoImpl implements LikeDao {
@@ -38,5 +43,19 @@ public class LikeDaoImpl implements LikeDao {
     public int checkLikes(Long filmId) {
         Integer count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM likes WHERE film_id=?", Integer.class, filmId);
         return count != null ? count : 0;
+    }
+
+    @Override
+    public Map<Long, Set<Long>> getAllLikesMap() {
+        String sql = "SELECT user_id, film_id FROM likes";
+        return jdbcTemplate.query(sql, rs -> {
+            Map<Long, Set<Long>> likesMap = new HashMap<>();
+            while (rs.next()) {
+                Long userId = rs.getLong("user_id");
+                Long filmId = rs.getLong("film_id");
+                likesMap.computeIfAbsent(userId, k -> new HashSet<>()).add(filmId);
+            }
+            return likesMap;
+        });
     }
 }
