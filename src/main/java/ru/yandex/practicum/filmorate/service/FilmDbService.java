@@ -1,10 +1,18 @@
 package ru.yandex.practicum.filmorate.service;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
+import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.dao.genre.GenreDao;
 import ru.yandex.practicum.filmorate.storage.dao.like.LikeDao;
@@ -12,9 +20,6 @@ import ru.yandex.practicum.filmorate.storage.dao.mpa.MpaDao;
 import ru.yandex.practicum.filmorate.storage.films.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 import ru.yandex.practicum.filmorate.utils.ValidationUtils;
-
-import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Сервис для обработки бизнес-логики, связанной с фильмами.
@@ -72,8 +77,8 @@ public class FilmDbService {
      * Возвращает список популярных фильмов, отсортированных по количеству лайков.
      *
      * @param topNumber количество фильмов для отображения
-     * @param genreId идентификатор жанра для фильтрации
-     * @param year год выпуска фильма для фильтрации
+     * @param genreId   идентификатор жанра для фильтрации
+     * @param year      год выпуска фильма для фильтрации
      * @return список популярных фильмов
      */
     public List<Film> getPopularFilms(int topNumber, Integer genreId, Integer year) {
@@ -83,14 +88,14 @@ public class FilmDbService {
 
         List<Film> films = new ArrayList<>(filmStorage.getFilteredFilms(genreId, year));
         return films.stream()
-                .sorted(Comparator.comparingInt((Film film) -> {
-                            int likes = likeDao.checkLikes(film.getId());
-                            return likes < 0 ? 0 : likes;
-                        }).reversed()
-                        .thenComparing(Film::getReleaseDate, Comparator.reverseOrder()))
-                .limit(topNumber)
-                .peek(this::enrichFilmWithDetails)
-                .collect(Collectors.toList());
+            .sorted(Comparator.comparingInt((Film film) -> {
+                    int likes = likeDao.checkLikes(film.getId());
+                    return likes < 0 ? 0 : likes;
+                }).reversed()
+                .thenComparing(Film::getReleaseDate, Comparator.reverseOrder()))
+            .limit(topNumber)
+            .peek(this::enrichFilmWithDetails)
+            .collect(Collectors.toList());
     }
 
     /**
@@ -161,8 +166,8 @@ public class FilmDbService {
      */
     public Collection<Film> getAllFilms() {
         return filmStorage.getFilms().stream()
-                .peek(this::enrichFilmWithDetails)
-                .collect(Collectors.toList());
+            .peek(this::enrichFilmWithDetails)
+            .collect(Collectors.toList());
     }
 
     /**
@@ -200,5 +205,27 @@ public class FilmDbService {
      */
     public void deleteFilmById(long id) {
         filmStorage.deleteById(id);
+    }
+
+    /**
+     * Поиск фильмов с валидацией параметров
+     *
+     * @param query текст для поиска (не должен быть пустым)
+     * @param by    критерии поиска (должен соответствовать формату "title", "director" или
+     *              "title,director")
+     * @return список найденных фильмов
+     * @throws ValidationException при некорректных параметрах запроса
+     */
+    public List<Film> searchFilms(String query, String by) {
+        if (query == null || query.isBlank()) {
+            return Collections.emptyList();
+        }
+
+        if (!by.matches("^(title|director)(,(title|director))?$")) {
+            throw new ValidationException(
+                "Parameter 'by' must be 'title', 'director' or 'title,director'");
+        }
+
+        return filmStorage.searchFilms(query, by);
     }
 }

@@ -2,16 +2,25 @@ package ru.yandex.practicum.filmorate.controller;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
+import java.util.Collection;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmDbService;
-
-import java.util.Collection;
 
 /**
  * Класс-контроллер для работы с фильмами
@@ -57,7 +66,8 @@ public class FilmController {
      * @return пустой ответ с успешным статусом
      */
     @PutMapping("/{film_id}/like/{user_id}")
-    public ResponseEntity<Void> addLike(@PathVariable("film_id") Long filmId, @PathVariable("user_id") Long userId) {
+    public ResponseEntity<Void> addLike(@PathVariable("film_id") Long filmId,
+        @PathVariable("user_id") Long userId) {
         filmService.addLike(userId, filmId);
         return ResponseEntity.noContent().build();
     }
@@ -71,7 +81,8 @@ public class FilmController {
      * @return пустой ответ с успешным статусом
      */
     @DeleteMapping("/{film_id}/like/{id}")
-    public ResponseEntity<Void> deleteLikeFilm(@PathVariable("film_id") Long filmId, @PathVariable("id") Long userId) {
+    public ResponseEntity<Void> deleteLikeFilm(@PathVariable("film_id") Long filmId,
+        @PathVariable("id") Long userId) {
         filmService.deleteLike(filmId, userId);
         log.info("У фильма с id={} удален лайк от пользователя id={}", filmId, userId);
         return ResponseEntity.noContent().build();
@@ -101,16 +112,16 @@ public class FilmController {
     /**
      * Получает список наиболее популярных фильмов.
      *
-     * @param count количество возвращаемых фильмов (по умолчанию — 10)
+     * @param count   количество возвращаемых фильмов (по умолчанию — 10)
      * @param genreId идентификатор жанра для фильтрации
-     * @param year год выпуска фильма для фильтрации
+     * @param year    год выпуска фильма для фильтрации
      * @return коллекция популярных фильмов
      */
     @GetMapping("/popular")
     public Collection<Film> getPopularFilms(
-            @RequestParam(value = "count", defaultValue = "10") Integer count,
-            @RequestParam(value = "genreId", required = false) Integer genreId,
-            @RequestParam(value = "year", required = false) Integer year) {
+        @RequestParam(value = "count", defaultValue = "10") Integer count,
+        @RequestParam(value = "genreId", required = false) Integer genreId,
+        @RequestParam(value = "year", required = false) Integer year) {
         log.info("Запрос популярных фильмов: count={}, genreId={}, year={}", count, genreId, year);
         return filmService.getPopularFilms(count, genreId, year);
     }
@@ -125,5 +136,19 @@ public class FilmController {
     public ResponseEntity<Void> deleteFilmById(@PathVariable @Positive Long filmId) {
         filmService.deleteFilmById(filmId);
         return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * Поиск фильмов по названию и/или режиссеру
+     *
+     * @param query текст для поиска (обязательный параметр)
+     * @param by    критерии поиска: "title" (по умолчанию), "director" или "title,director"
+     * @return список найденных фильмов в формате JSON
+     */
+    @GetMapping("/search")
+    public List<Film> searchFilms(
+        @RequestParam String query,
+        @RequestParam(defaultValue = "title") String by) {
+        return filmService.searchFilms(query, by);
     }
 }

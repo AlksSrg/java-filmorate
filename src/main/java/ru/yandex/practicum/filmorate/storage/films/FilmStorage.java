@@ -1,15 +1,16 @@
 package ru.yandex.practicum.filmorate.storage.films;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
-
-import java.util.Collection;
-import java.util.Set;
 
 /**
  * Интерфейс для работы с хранилищем фильмов.
  */
 public interface FilmStorage {
+
     /**
      * Сохраняет новый фильм в хранилище.
      *
@@ -53,7 +54,7 @@ public interface FilmStorage {
      * Возвращает список фильм с фильтрацией по жанру и/или году
      *
      * @param genreId идентификатор жанра для фильтрации
-     * @param year год выпуска для фильтрации
+     * @param year    год выпуска для фильтрации
      * @return списка отфильтрованных фильмов
      */
     Collection<Film> getFilteredFilms(Integer genreId, Integer year);
@@ -64,4 +65,14 @@ public interface FilmStorage {
      * @param id идентификатор фильма
      */
     void deleteById(long id);
+
+    /**
+     * Поиск фильмов по заданным критериям
+     *
+     * @param query текст для поиска
+     * @param by    критерии поиска: "title" (по названию), "director" (по режиссеру) или
+     *              "title,director" (по обоим критериям)
+     * @return список найденных фильмов, отсортированных по популярности (по убыванию)
+     */
+    List<Film> searchFilms(String query, String by);
 }

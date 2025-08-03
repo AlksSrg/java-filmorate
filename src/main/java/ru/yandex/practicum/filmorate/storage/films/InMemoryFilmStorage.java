@@ -1,16 +1,16 @@
 package ru.yandex.practicum.filmorate.storage.films;
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
-
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.TreeSet;
-import java.util.stream.Collectors;
 
 /**
  * Реализация хранилища фильмов в памяти.
@@ -107,16 +107,16 @@ public class InMemoryFilmStorage implements FilmStorage {
 
         if (genreId != null) {
             result = result.stream()
-                    .filter(film -> film.getGenres() != null && film.getGenres().stream()
-                            .anyMatch(genre -> genre.getId().equals(genreId)))
-                    .collect(Collectors.toList());
+                .filter(film -> film.getGenres() != null && film.getGenres().stream()
+                    .anyMatch(genre -> genre.getId().equals(genreId)))
+                .collect(Collectors.toList());
         }
 
         if (year != null) {
             result = result.stream()
-                    .filter(film -> film.getReleaseDate() != null &&
-                            film.getReleaseDate().getYear() == year)
-                    .collect(Collectors.toList());
+                .filter(film -> film.getReleaseDate() != null &&
+                                film.getReleaseDate().getYear() == year)
+                .collect(Collectors.toList());
         }
 
         return result;
@@ -131,5 +131,10 @@ public class InMemoryFilmStorage implements FilmStorage {
     public void deleteById(long id) {
         log.warn("Использование устаревшей реализации");
         throw new UnsupportedOperationException("Метод не поддерживается в устаревшей реализации");
+    }
+
+    @Override
+    public List<Film> searchFilms(String query, String by) {
+        return List.of();
     }
 }

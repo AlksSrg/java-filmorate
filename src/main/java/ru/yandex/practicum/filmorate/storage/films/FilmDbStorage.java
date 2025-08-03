@@ -1,10 +1,22 @@
 package ru.yandex.practicum.filmorate.storage.films;
 
+import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Primary;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.PreparedStatementSetter;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
@@ -13,11 +25,6 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.mapper.FilmMapper;
 import ru.yandex.practicum.filmorate.storage.mapper.GenreMapper;
-
-import java.sql.Date;
-import java.sql.PreparedStatement;
-import java.sql.Statement;
-import java.util.*;
 
 @Slf4j
 @Component("FilmDbStorage")
@@ -30,12 +37,13 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public Film addFilm(Film film) {
         String sqlInsert =
-                "INSERT INTO film (name, description, release_date, duration, mpa_id) VALUES (?,?,?,?,?)";
+            "INSERT INTO film (name, description, release_date, duration, mpa_id) VALUES (?,?,?,?,?)";
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
         jdbcTemplate.update(connection -> {
-            PreparedStatement ps = connection.prepareStatement(sqlInsert, Statement.RETURN_GENERATED_KEYS);
+            PreparedStatement ps = connection.prepareStatement(sqlInsert,
+                Statement.RETURN_GENERATED_KEYS);
             ps.setString(1, film.getName());
             ps.setString(2, film.getDescription());
             ps.setDate(3, Date.valueOf(film.getReleaseDate()));
@@ -43,7 +51,6 @@ public class FilmDbStorage implements FilmStorage {
             ps.setLong(5, film.getMpa().getId());
             return ps;
         }, keyHolder);
-
 
         long generatedId = keyHolder.getKey().longValue();
         film.setId(generatedId);
@@ -59,9 +66,9 @@ public class FilmDbStorage implements FilmStorage {
         }
 
         jdbcTemplate.update(
-                "UPDATE film SET name=?, description=?, release_date=?, duration=?, mpa_id=? WHERE film_id=?",
-                film.getName(), film.getDescription(), Date.valueOf(film.getReleaseDate()),
-                film.getDuration(), film.getMpa().getId(), filmId
+            "UPDATE film SET name=?, description=?, release_date=?, duration=?, mpa_id=? WHERE film_id=?",
+            film.getName(), film.getDescription(), Date.valueOf(film.getReleaseDate()),
+            film.getDuration(), film.getMpa().getId(), filmId
         );
 
         // Если UPDATE прошел успешно, вернём фильм
@@ -76,9 +83,10 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public Film getFilmById(Long id) {
         try {
-            return jdbcTemplate.queryForObject("SELECT * FROM film WHERE film_id=?", new FilmMapper(), id);
+            return jdbcTemplate.queryForObject("SELECT * FROM film WHERE film_id=?",
+                new FilmMapper(), id);
         } catch (
-                EmptyResultDataAccessException e) {
+            EmptyResultDataAccessException e) {
             throw new EntityNotFoundException("Фильм с id " + id + " не найден");
         }
     }
@@ -86,11 +94,11 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public Set<Genre> getGenresByFilm(Long filmId) {
         List<Genre> genresList = jdbcTemplate.query(
-                "SELECT f.genre_id, g.genre_name FROM film_genre AS f " +
-                "LEFT OUTER JOIN genre AS g ON f.genre_id = g.genre_id " +
-                "WHERE f.film_id=? ORDER BY g.genre_id",
-                new GenreMapper(),
-                filmId
+            "SELECT f.genre_id, g.genre_name FROM film_genre AS f " +
+            "LEFT OUTER JOIN genre AS g ON f.genre_id = g.genre_id " +
+            "WHERE f.film_id=? ORDER BY g.genre_id",
+            new GenreMapper(),
+            filmId
         );
 
         TreeSet<Genre> genresByFilm = new TreeSet<>(Comparator.comparing(Genre::getId));
@@ -110,7 +118,8 @@ public class FilmDbStorage implements FilmStorage {
         }
 
         if (year != null) {
-            sql.append(genreId != null ? " AND" : " WHERE").append(" EXTRACT(YEAR FROM f.release_date) = ?");
+            sql.append(genreId != null ? " AND" : " WHERE")
+                .append(" EXTRACT(YEAR FROM f.release_date) = ?");
             params.add(year);
         }
 
@@ -124,7 +133,42 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public void deleteById(long id) {
         if (jdbcTemplate.update("DELETE FROM film WHERE film_id = ?", id) == 0) {
-            throw new EntityNotFoundException(String.format("Фильма с id %s и так не существует", id));
+            throw new EntityNotFoundException(
+                String.format("Фильма с id %s и так не существует", id));
         }
+    }
+
+    /**
+     * Поиск фильмов в базе данных по заданным критериям
+     *
+     * @param query текст для поиска (подстрока)
+     * @param by    критерии поиска: "title", "director" или "title,director"
+     * @return список найденных фильмов, отсортированных по рейтингу (по убыванию)
+     */
+    @Override
+    public List<Film> searchFilms(String query, String by) {
+        String sql = "SELECT f.* FROM films f ";
+
+        if (by.contains("director")) {
+            sql += "LEFT JOIN film_director fd ON f.film_id = fd.film_id " +
+                   "LEFT JOIN directors d ON fd.director_id = d.director_id ";
+        }
+
+        sql += "WHERE ";
+
+        List<String> conditions = new ArrayList<>();
+        if (by.contains("title")) {
+            conditions.add("LOWER(f.name) LIKE LOWER(:query)");
+        }
+        if (by.contains("director")) {
+            conditions.add("LOWER(d.name) LIKE LOWER(:query)");
+        }
+
+        sql += String.join(" OR ", conditions) + " " +
+               "ORDER BY f.rate DESC";
+
+        return jdbcTemplate.query(sql,
+            (PreparedStatementSetter) Map.of("query", "%" + query + "%"),
+            new FilmMapper());
     }
 }
