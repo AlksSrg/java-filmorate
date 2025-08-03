@@ -12,6 +12,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmDbService;
 
 import java.util.Collection;
+import java.util.List;
 
 /**
  * Класс-контроллер для работы с фильмами
@@ -72,7 +73,7 @@ public class FilmController {
      */
     @DeleteMapping("/{film_id}/like/{id}")
     public ResponseEntity<Void> deleteLikeFilm(@PathVariable("film_id") Long filmId, @PathVariable("id") Long userId) {
-        filmService.deleteLike(filmId, userId);
+        filmService.deleteLikeFilm(filmId, userId);
         log.info("У фильма с id={} удален лайк от пользователя id={}", filmId, userId);
         return ResponseEntity.noContent().build();
     }
@@ -101,9 +102,9 @@ public class FilmController {
     /**
      * Получает список наиболее популярных фильмов.
      *
-     * @param count количество возвращаемых фильмов (по умолчанию — 10)
+     * @param count   количество возвращаемых фильмов (по умолчанию — 10)
      * @param genreId идентификатор жанра для фильтрации
-     * @param year год выпуска фильма для фильтрации
+     * @param year    год выпуска фильма для фильтрации
      * @return коллекция популярных фильмов
      */
     @GetMapping("/popular")
@@ -125,5 +126,21 @@ public class FilmController {
     public ResponseEntity<Void> deleteFilmById(@PathVariable @Positive Long filmId) {
         filmService.deleteFilmById(filmId);
         return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * Возвращает список общих фильмов между двумя пользователями, отсортированных по популярности.
+     *
+     * @param userId   идентификатор первого пользователя
+     * @param friendId идентификатор второго пользователя
+     * @return список общих фильмов
+     */
+    @GetMapping("/common")
+    public ResponseEntity<List<Film>> getCommonFilms(
+            @RequestParam("userId") Long userId,
+            @RequestParam("friendId") Long friendId) {
+        log.info("Запрос общих фильмов для пользователей {} и {}", userId, friendId);
+        List<Film> commonFilms = filmService.getCommonFilms(userId, friendId);
+        return ResponseEntity.ok(commonFilms);
     }
 }

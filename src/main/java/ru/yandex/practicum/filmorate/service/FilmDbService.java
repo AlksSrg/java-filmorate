@@ -3,7 +3,10 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.dao.genre.GenreDao;
@@ -58,22 +61,27 @@ public class FilmDbService {
     }
 
     /**
-     * Удаляет лайк у фильма от определенного пользователя.
+     * Убирает лайк у фильма от конкретного пользователя.
      *
-     * @param userId идентификатор пользователя
-     * @param filmId идентификатор фильма
+     * @param filmId уникальный идентификатор фильма
+     * @param userId уникальный идентификатор пользователя
+     * @return пустой ответ с успешным статусом
      */
-    public void deleteLike(Long userId, Long filmId) {
+    @DeleteMapping("/{filmId}/like/{userId}")
+    public ResponseEntity<Void> deleteLikeFilm(
+            @PathVariable("filmId") Long filmId,
+            @PathVariable("userId") Long userId) {
         likeDao.deleteLike(userId, filmId);
-        log.info("Пользователь с id {} удалил лайк у фильма с id {}", userId, filmId);
+        log.info("У фильма с id={} удален лайк от пользователя id={}", filmId, userId);
+        return ResponseEntity.noContent().build();
     }
 
     /**
      * Возвращает список популярных фильмов, отсортированных по количеству лайков.
      *
      * @param topNumber количество фильмов для отображения
-     * @param genreId идентификатор жанра для фильтрации
-     * @param year год выпуска фильма для фильтрации
+     * @param genreId   идентификатор жанра для фильтрации
+     * @param year      год выпуска фильма для фильтрации
      * @return список популярных фильмов
      */
     public List<Film> getPopularFilms(int topNumber, Integer genreId, Integer year) {
@@ -215,5 +223,40 @@ public class FilmDbService {
             film.setMpa(mpaDao.getMpaById(film.getMpa().getId()));
         }
         return films;
+    }
+
+    /**
+     * Возвращает список общих фильмов между двумя пользователями, отсортированных по популярности.
+     *
+     * @param userId   идентификатор первого пользователя
+     * @param friendId идентификатор второго пользователя
+     * @return список общих фильмов, отсортированных по количеству лайков
+     * @throws EntityNotFoundException если один из пользователей не найден
+     */
+    public List<Film> getCommonFilms(Long userId, Long friendId) {
+        // Проверяем существование пользователей
+        userStorage.getUserById(userId);
+        userStorage.getUserById(friendId);
+
+        // Получаем ID фильмов с лайками каждого пользователя
+        Set<Long> userLikedFilms = likeDao.getLikedFilms(userId);
+        Set<Long> friendLikedFilms = likeDao.getLikedFilms(friendId);
+
+        // Находим пересечение
+        Set<Long> commonFilmIds = userLikedFilms.stream()
+                .filter(friendLikedFilms::contains)
+                .collect(Collectors.toSet());
+
+        if (commonFilmIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        // Получаем фильмы, обогащаем и сортируем
+        return filmStorage.getFilmsByIds(commonFilmIds).stream()
+                .peek(this::enrichFilmWithDetails)
+                .sorted(Comparator.comparingInt((Film film) ->
+                                likeDao.getLikesCount(film.getId()))
+                        .reversed())
+                .collect(Collectors.toList());
     }
 }

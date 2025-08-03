@@ -58,4 +58,21 @@ public class LikeDaoImpl implements LikeDao {
             return likesMap;
         });
     }
+
+    @Override
+    public Set<Long> getLikedFilms(Long userId) {
+        String sql = "SELECT film_id FROM likes WHERE user_id = ?";
+        return new HashSet<>(jdbcTemplate.query(
+                sql,
+                (rs, rowNum) -> rs.getLong("film_id"),
+                userId
+        ));
+    }
+
+    @Override
+    public int getLikesCount(Long filmId) {
+        String sql = "SELECT COUNT(*) FROM likes WHERE film_id = ?";
+        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, filmId);
+        return count != null ? count : 0;
+    }
 }
