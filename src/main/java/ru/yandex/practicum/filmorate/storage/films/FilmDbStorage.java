@@ -147,7 +147,7 @@ public class FilmDbStorage implements FilmStorage {
      */
     @Override
     public List<Film> searchFilms(String query, String by) {
-        String sql = "SELECT f.* FROM films f ";
+        String sql = "SELECT DISTINCT f.* FROM films f ";
 
         if (by.contains("director")) {
             sql += "LEFT JOIN film_director fd ON f.film_id = fd.film_id " +
@@ -158,17 +158,23 @@ public class FilmDbStorage implements FilmStorage {
 
         List<String> conditions = new ArrayList<>();
         if (by.contains("title")) {
-            conditions.add("LOWER(f.name) LIKE LOWER(:query)");
+            conditions.add("LOWER(f.name) LIKE LOWER(CONCAT('%', ?, '%'))");
         }
         if (by.contains("director")) {
-            conditions.add("LOWER(d.name) LIKE LOWER(:query)");
+            conditions.add("LOWER(d.name) LIKE LOWER(CONCAT('%', ?, '%'))");
         }
 
         sql += String.join(" OR ", conditions) + " " +
                "ORDER BY f.rate DESC";
 
-        return jdbcTemplate.query(sql,
-            (PreparedStatementSetter) Map.of("query", "%" + query + "%"),
-            new FilmMapper());
+        return jdbcTemplate.query(sql, ps -> {
+            int paramIndex = 1;
+            if (by.contains("title")) {
+                ps.setString(paramIndex++, query);
+            }
+            if (by.contains("director")) {
+                ps.setString(paramIndex, query);
+            }
+        }, new FilmMapper());
     }
 }
