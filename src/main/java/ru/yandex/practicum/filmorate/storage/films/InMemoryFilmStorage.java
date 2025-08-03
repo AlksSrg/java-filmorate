@@ -6,12 +6,7 @@ import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.Collections;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -103,26 +98,6 @@ public class InMemoryFilmStorage implements FilmStorage {
         return null;
     }
 
-    @Override
-    public Collection<Film> getFilteredFilms(Integer genreId, Integer year) {
-        Collection<Film> result = films.values();
-
-        if (genreId != null) {
-            result = result.stream()
-                    .filter(film -> film.getGenres() != null && film.getGenres().stream()
-                            .anyMatch(genre -> genre.getId().equals(genreId)))
-                    .collect(Collectors.toList());
-        }
-
-        if (year != null) {
-            result = result.stream()
-                    .filter(film -> film.getReleaseDate() != null &&
-                            film.getReleaseDate().getYear() == year)
-                    .collect(Collectors.toList());
-        }
-
-        return result;
-    }
 
     /**
      * Пустая реализация метода из интерфейса
