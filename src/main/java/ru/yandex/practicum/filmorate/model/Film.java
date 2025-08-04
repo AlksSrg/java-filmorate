@@ -1,6 +1,9 @@
 package ru.yandex.practicum.filmorate.model;
 
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PositiveOrZero;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Length;
@@ -32,9 +35,8 @@ public class Film {
     private String description;
 
     /**
-     * Дата выпуска фильма, значение должно быть не ранее 28 декабря 1895 года.
+     * Дата выпуска фильма.
      */
-    @Past(message = "Дата релиза должна быть позже или равна 28 декабря 1895 года")
     private LocalDate releaseDate;
 
     /**
@@ -53,6 +55,11 @@ public class Film {
      */
     @NotNull
     private Mpa mpa;
+
+    /**
+     * Список режиссёров фильма.
+     */
+    private Set<Director> directors;
 
     /**
      * Конструктор для инициализации объекта фильма основными полями.

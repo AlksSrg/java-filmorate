@@ -8,7 +8,11 @@ import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.storage.mapper.MpaMapper;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @AllArgsConstructor
 @Component
@@ -28,5 +32,27 @@ public class MpaDaoImpl implements MpaDao {
     @Override
     public List<Mpa> getListMpa() {
         return jdbcTemplate.query("SELECT * FROM mpa ORDER BY mpa_id", new MpaMapper());
+    }
+
+    @Override
+    public Map<Long, Mpa> getMpaMapByFilms(Set<Long> filmIds) {
+        String sql = """
+                SELECT f.film_id, m.mpa_id, m.mpa_name
+                FROM film f
+                JOIN mpa m ON f.mpa_id = m.mpa_id
+                WHERE f.film_id IN (%s)""".formatted(filmIds.stream().map(id -> "?")
+                .collect(Collectors.joining(", ")));
+        return jdbcTemplate.query(sql, filmIds.toArray(), (rs) -> {
+            Map<Long, Mpa> mpaMap = new HashMap<>();
+            while (rs.next()) {
+                Mpa mpa = new Mpa();
+                mpa.setId(rs.getInt("mpa_id"));
+                mpa.setName(rs.getString("mpa_name"));
+
+                Long filmId = rs.getLong("film_id");
+                mpaMap.put(filmId, mpa);
+            }
+            return mpaMap;
+        });
     }
 }

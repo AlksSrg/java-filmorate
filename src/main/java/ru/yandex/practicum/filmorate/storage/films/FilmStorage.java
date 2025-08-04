@@ -81,4 +81,13 @@ public interface FilmStorage {
      * @return список найденных фильмов
      */
     List<Film> getFilmsByIds(Set<Long> filmIds);
+
+    /**
+     * Возвращает отсортированный список фильмов заданного режиссёра по лайкам или годам выпуска.
+     *
+     * @param directorId id режиссёра чьи фильмы будут сортироваться.
+     * @param sortBy     параметр сортировки year или likes
+     * @return возвращает список отсортированных фильмов.
+     */
+    Collection<Film> getFilmsByDirector(Long directorId, String sortBy);
 }

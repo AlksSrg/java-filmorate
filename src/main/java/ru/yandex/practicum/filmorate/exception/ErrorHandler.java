@@ -69,7 +69,7 @@ public class ErrorHandler {
      * @return сформированный ответ с телом, содержащим ошибку
      */
     private ResponseEntity<Map<String, Object>> createErrorResponse(String message, HttpStatus status) {
-        Map<String, Object> errorResponse = Collections.singletonMap("message", message);
+        Map<String, Object> errorResponse = Collections.singletonMap("error", message);
         return ResponseEntity.status(status).body(errorResponse);
     }
 }

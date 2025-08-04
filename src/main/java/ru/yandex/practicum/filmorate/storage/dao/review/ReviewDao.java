@@ -1,8 +1,9 @@
 package ru.yandex.practicum.filmorate.storage.dao.review;
 
+import ru.yandex.practicum.filmorate.model.Review;
+
 import java.util.List;
 import java.util.Optional;
-import ru.yandex.practicum.filmorate.model.Review;
 
 /**
  * Интерфейс для работы с хранилищем отзывов.
