@@ -26,5 +26,11 @@ public interface MpaDao {
      */
     List<Mpa> getListMpa();
 
+    /**
+     * Возвращает таблицу с рейтингами МРА для заданных фильмов.
+     *
+     * @param filmIds список id фильмов
+     * @return таблицу, где ключ - id фильма, значение - объект МРА.
+     */
     Map<Long, Mpa> getMpaMapByFilms(Set<Long> filmIds);
 }

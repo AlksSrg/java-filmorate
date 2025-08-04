@@ -32,7 +32,7 @@ public class Film {
     private String description;
 
     /**
-     * Дата выпуска фильма, значение должно быть не ранее 28 декабря 1895 года.
+     * Дата выпуска фильма.
      */
     private LocalDate releaseDate;
 
@@ -53,6 +53,9 @@ public class Film {
     @NotNull
     private Mpa mpa;
 
+    /**
+     * Список режиссёров фильма.
+     */
     private Set<Director> directors;
 
     /**

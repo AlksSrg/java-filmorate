@@ -49,15 +49,49 @@ public interface DirectorStorage {
      */
     void deleteById(long id);
 
+    /**
+     * Возвращает список режиссеров для заданного фильма
+     *
+     * @param filmId идентификатор фильма
+     * @return список объектов режиссёров
+     */
     Set<Director> getDirectorsByFilmId(Long filmId);
 
+    /**
+     * Добавляет список режиссёров к заданному фильму
+     *
+     * @param filmId идентификатор фильма
+     * @param directors список объектов режиссёров для данного фильма
+     */
     void addDirectors(Long filmId, Set<Director> directors);
 
+    /**
+     * Удаление списка режиссеров у фильма
+     *
+     * @param filmId идентификатор фильма
+     */
     void deleteDirectorsByFilmId(Long filmId);
 
+    /**
+     * Обновление списка режиссёров к заданному фильму
+     *
+     * @param filmId идентификатор фильма
+     * @param directors новый список объектов режиссёров для данного фильма
+     */
     void updateDirectorsForFilm(Long filmId, Set<Director> directors);
 
+    /**
+     * Получение информации о режиссерах для всех фильмов в виде таблицы
+     *
+     * @return таблицу, где ключ - id фильма, значение - список объектов режиссёров
+     */
     Map<Long, Set<Director>> getAllDirectorsMap();
 
+    /**
+     * Возвращает таблицу режиссёров для заданного списка id фильмов.
+     *
+     * @param filmIds список id фильмов
+     * @return таблицу, где ключ - id фильма, значение - список режиссёров.
+     */
     Map<Long, Set<Director>> getDirectorMapByFilms(Set<Long> filmIds);
 }

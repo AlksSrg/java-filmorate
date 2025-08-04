@@ -195,7 +195,7 @@ public class FilmDbService {
     }
 
     /**
-     * Дополняет фильм информацией о жанрах и рейтинге MPA.
+     * Дополняет фильм информацией о жанрах, рейтинге MPA и режиссёрах.
      *
      * @param film объект фильма
      */
@@ -250,6 +250,13 @@ public class FilmDbService {
         return films;
     }
 
+    /**
+     * Сортировка фильмов заданного режиссёру по лайкам или годам выпуска.
+     *
+     * @param directorId id режиссёра чьи фильмы будут сортироваться.
+     * @param sort параметр сортировки year или likes
+     * @return возвращает список отсортированных фильмов.
+     */
     public Collection<Film> getFilmsByDirector(Long directorId, String sort) {
         if (directorStorage.getDirectorById(directorId) == null) {
             throw new EntityNotFoundException(String.format("Режиссера с таким id - %s не существует.", directorId));

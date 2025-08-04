@@ -49,5 +49,11 @@ public interface GenreDao {
      */
     Set<Genre> getGenresByFilm(Long filmId);
 
+    /**
+     * Возвращает таблицу жанров для заданного списка id фильмов.
+     *
+     * @param filmIds список id фильмов
+     * @return таблицу, где ключ - id фильма, значение - список жанров.
+     */
     Map<Long, Set<Genre>> getGenresMapByFilms(Set<Long> filmIds);
 }
