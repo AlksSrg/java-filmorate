@@ -8,14 +8,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
-import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.*;
 import ru.yandex.practicum.filmorate.storage.dao.genre.GenreDao;
 import ru.yandex.practicum.filmorate.storage.dao.like.LikeDao;
 import ru.yandex.practicum.filmorate.storage.dao.mpa.MpaDao;
+import ru.yandex.practicum.filmorate.storage.director.DirectorStorage;
 import ru.yandex.practicum.filmorate.storage.films.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 import ru.yandex.practicum.filmorate.utils.ValidationUtils;
 
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -40,13 +42,18 @@ public class FilmDbService {
      */
     private final GenreDao genreDao;
     /**
-     * Репозиторий для работы с рейтингами MPAA.
+     * Репозиторий для работы с рейтингами MPA.
      */
     private final MpaDao mpaDao;
     /**
      * Репозиторий для работы с лайками.
      */
     private final LikeDao likeDao;
+
+    /**
+     * Репозиторий для работы с режиссёрами.
+     */
+    private final DirectorStorage directorStorage;
 
     /**
      * Добавляет лайк фильму от определенного пользователя.
@@ -112,6 +119,10 @@ public class FilmDbService {
             genreDao.updateGenres(addedFilm.getId(), film.getGenres());
         }
 
+        if (film.getDirectors() != null) {
+            directorStorage.addDirectors(film.getId(), film.getDirectors());
+        }
+
         return addedFilm;
     }
 
@@ -127,8 +138,19 @@ public class FilmDbService {
             throw new EntityNotFoundException("Фильм с указанным ID не найден");
         }
 
+        LocalDate releaseDate = film.getReleaseDate();
+        if (releaseDate == null || releaseDate.isBefore(LocalDate.of(1895, 12, 28))) {
+            film.setReleaseDate(currentFilm.getReleaseDate());
+        }
+
+
         Film updatedFilm = filmStorage.updateFilm(film);
+
+        genreDao.updateGenres(film.getId(), film.getGenres());
+        directorStorage.updateDirectorsForFilm(film.getId(), film.getDirectors());
+
         enrichFilmWithDetails(updatedFilm);
+
         return updatedFilm;
     }
 
@@ -169,7 +191,7 @@ public class FilmDbService {
     }
 
     /**
-     * Дополняет фильм информацией о жанрах и рейтинге MPA.
+     * Дополняет фильм информацией о жанрах, рейтинге MPA и режиссёрах.
      *
      * @param film объект фильма
      */
@@ -179,6 +201,9 @@ public class FilmDbService {
 
         // Получить рейтинг MPА
         film.setMpa(mpaDao.getMpaById(film.getMpa().getId()));
+
+        //Получить режиссёров
+        film.setDirectors(new HashSet<>(directorStorage.getDirectorsByFilmId(film.getId())));
     }
 
     /**
@@ -216,7 +241,43 @@ public class FilmDbService {
         for (Film film : films) {
             film.setGenres(filmStorage.getGenresByFilm(film.getId()));
             film.setMpa(mpaDao.getMpaById(film.getMpa().getId()));
+            film.setDirectors(directorStorage.getDirectorsByFilmId(film.getId()));
         }
+        return films;
+    }
+
+    /**
+     * Сортировка фильмов заданного режиссёру по лайкам или годам выпуска.
+     *
+     * @param directorId id режиссёра чьи фильмы будут сортироваться.
+     * @param sort параметр сортировки year или likes
+     * @return возвращает список отсортированных фильмов.
+     */
+    public Collection<Film> getFilmsByDirector(Long directorId, String sort) {
+        if (directorStorage.getDirectorById(directorId) == null) {
+            throw new EntityNotFoundException(String.format("Режиссера с таким id - %s не существует.", directorId));
+        }
+        if (!sort.equals("year") && !sort.equals("likes")) {
+            throw new EntityNotFoundException(String.format("Нет сортировки по указанному параметру %s", sort));
+        }
+
+        Collection<Film> films = filmStorage.getFilmsByDirector(directorId, sort);
+
+        if (films.isEmpty()) {
+            return films;
+        }
+
+        Set<Long> filmIds = films.stream().map(Film::getId).collect(Collectors.toSet());
+        Map<Long, Set<Genre>> genresMap = genreDao.getGenresMapByFilms(filmIds);
+        Map<Long, Set<Director>> directorsMap = directorStorage.getDirectorMapByFilms(filmIds);
+        Map<Long, Mpa> mpaMap = mpaDao.getMpaMapByFilms(filmIds);
+
+        for (Film film : films) {
+            film.setDirectors(directorsMap.get(film.getId()));
+            film.setGenres(genresMap.get(film.getId()));
+            film.setMpa(mpaMap.get(film.getId()));
+        }
+
         return films;
     }
 

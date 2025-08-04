@@ -155,4 +155,12 @@ public class InMemoryFilmStorage implements FilmStorage {
                 .filter(film -> filmIds.contains(film.getId()))
                 .collect(Collectors.toList());
     }
+
+    /**
+     * Метод заглушка для неактуальной реализации.
+     */
+    @Override
+    public Collection<Film> getFilmsByDirector(Long directorId, String sortBy) {
+        return null;
+    }
 }
