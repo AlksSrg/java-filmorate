@@ -39,4 +39,20 @@ public interface LikeDao {
      * а значением - множество идентификаторов фильмов, которым пользователь поставил лайк.
      */
     Map<Long, Set<Long>> getAllLikesMap();
+
+    /**
+     * Возвращает ID фильмов, которым пользователь поставил лайк
+     *
+     * @param userId идентификатор пользователя
+     * @return множество ID фильмов
+     */
+    Set<Long> getLikedFilms(Long userId);
+
+    /**
+     * Возвращает количество лайков у фильма
+     *
+     * @param filmId идентификатор фильма
+     * @return количество лайков
+     */
+    int getLikesCount(Long filmId);
 }
