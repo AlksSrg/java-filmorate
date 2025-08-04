@@ -88,8 +88,8 @@ public class FilmDbStorage implements FilmStorage {
     public Set<Genre> getGenresByFilm(Long filmId) {
         List<Genre> genresList = jdbcTemplate.query(
                 "SELECT f.genre_id, g.genre_name FROM film_genre AS f " +
-                "LEFT OUTER JOIN genre AS g ON f.genre_id = g.genre_id " +
-                "WHERE f.film_id=? ORDER BY g.genre_id",
+                        "LEFT OUTER JOIN genre AS g ON f.genre_id = g.genre_id " +
+                        "WHERE f.film_id=? ORDER BY g.genre_id",
                 new GenreMapper(),
                 filmId
         );
@@ -140,7 +140,7 @@ public class FilmDbStorage implements FilmStorage {
     public List<Film> getFilmsByIds(Set<Long> filmIds) {
         if (filmIds.isEmpty()) return Collections.emptyList();
         String sql = "SELECT * FROM film WHERE film_id IN (" +
-                     filmIds.stream().map(String::valueOf).collect(Collectors.joining(",")) + ")";
+                filmIds.stream().map(String::valueOf).collect(Collectors.joining(",")) + ")";
         return jdbcTemplate.query(sql, new FilmMapper());
     }
 
@@ -165,5 +165,4 @@ public class FilmDbStorage implements FilmStorage {
         }
         return jdbcTemplate.query(sql, new FilmMapper(), directorId);
     }
-
 }

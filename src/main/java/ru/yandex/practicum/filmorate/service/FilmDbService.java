@@ -14,7 +14,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
-import ru.yandex.practicum.filmorate.model.*;
+import ru.yandex.practicum.filmorate.model.Director;
+import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.storage.dao.genre.GenreDao;
 import ru.yandex.practicum.filmorate.storage.dao.like.LikeDao;
 import ru.yandex.practicum.filmorate.storage.dao.mpa.MpaDao;
@@ -263,7 +266,7 @@ public class FilmDbService {
      * Сортировка фильмов заданного режиссёру по лайкам или годам выпуска.
      *
      * @param directorId id режиссёра чьи фильмы будут сортироваться.
-     * @param sort параметр сортировки year или likes
+     * @param sort       параметр сортировки year или likes
      * @return возвращает список отсортированных фильмов.
      */
     public Collection<Film> getFilmsByDirector(Long directorId, String sort) {
