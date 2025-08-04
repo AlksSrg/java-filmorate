@@ -251,11 +251,21 @@ public class FilmDbService {
             return Collections.emptyList();
         }
 
-        // Получаем фильмы, обогащаем и сортируем
-        return filmStorage.getFilmsByIds(commonFilmIds).stream()
+        // Получаем все фильмы за один запрос
+        List<Film> films = filmStorage.getFilmsByIds(commonFilmIds);
+
+        // Получаем количество лайков для всех фильмов
+        Map<Long, Integer> likesCountMap = commonFilmIds.stream()
+                .collect(Collectors.toMap(
+                        filmId -> filmId,
+                        likeDao::getLikesCount
+                ));
+
+
+        return films.stream()
                 .peek(this::enrichFilmWithDetails)
                 .sorted(Comparator.comparingInt((Film film) ->
-                                likeDao.getLikesCount(film.getId()))
+                                likesCountMap.getOrDefault(film.getId(), 0))
                         .reversed())
                 .collect(Collectors.toList());
     }
