@@ -74,7 +74,7 @@ public class FilmController {
      */
     @DeleteMapping("/{film_id}/like/{id}")
     public ResponseEntity<Void> deleteLikeFilm(@PathVariable("film_id") Long filmId, @PathVariable("id") Long userId) {
-        filmService.deleteLike(filmId, userId);
+        filmService.deleteLikeFilm(filmId, userId);
         log.info("У фильма с id={} удален лайк от пользователя id={}", filmId, userId);
         return ResponseEntity.noContent().build();
     }

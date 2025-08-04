@@ -60,7 +60,7 @@ public interface DirectorStorage {
     /**
      * Добавляет список режиссёров к заданному фильму
      *
-     * @param filmId идентификатор фильма
+     * @param filmId    идентификатор фильма
      * @param directors список объектов режиссёров для данного фильма
      */
     void addDirectors(Long filmId, Set<Director> directors);
@@ -75,7 +75,7 @@ public interface DirectorStorage {
     /**
      * Обновление списка режиссёров к заданному фильму
      *
-     * @param filmId идентификатор фильма
+     * @param filmId    идентификатор фильма
      * @param directors новый список объектов режиссёров для данного фильма
      */
     void updateDirectorsForFilm(Long filmId, Set<Director> directors);

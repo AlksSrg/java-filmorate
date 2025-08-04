@@ -139,5 +139,4 @@ public class UserController {
     public List<Film> getRecommendations(@PathVariable(value = "id") @Positive Long userId) {
         return userService.getRecommendations(userId);
     }
-
 }

@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.service;
 
-import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
@@ -8,6 +7,8 @@ import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.storage.dao.review.ReviewDao;
 import ru.yandex.practicum.filmorate.storage.films.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
+
+import java.util.List;
 
 /**
  * Сервис для работы с отзывами.
@@ -43,7 +44,7 @@ public class ReviewService {
 
     public Review getById(Long id) {
         return reviewDao.findById(id)
-            .orElseThrow(() -> new EntityNotFoundException("Отзыв с id=" + id + " не найден"));
+                .orElseThrow(() -> new EntityNotFoundException("Отзыв с id=" + id + " не найден"));
     }
 
     public List<Review> getByFilmId(Long filmId, int count) {
@@ -51,8 +52,8 @@ public class ReviewService {
             filmStorage.getFilmById(filmId);
         }
         return filmId == null ?
-            reviewDao.findAll(count) :
-            reviewDao.findByFilmId(filmId, count);
+                reviewDao.findAll(count) :
+                reviewDao.findByFilmId(filmId, count);
     }
 
     public void addLike(Long reviewId, Long userId) {

@@ -1,14 +1,15 @@
 package ru.yandex.practicum.filmorate.storage.dao.review;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.storage.mapper.ReviewMapper;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @Repository
 public class ReviewDaoImpl implements ReviewDao {
@@ -22,8 +23,8 @@ public class ReviewDaoImpl implements ReviewDao {
     @Override
     public Review create(Review review) {
         SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
-            .withTableName("reviews")
-            .usingGeneratedKeyColumns("review_id");
+                .withTableName("reviews")
+                .usingGeneratedKeyColumns("review_id");
 
         Map<String, Object> values = new HashMap<>();
         values.put("content", review.getContent());
@@ -41,10 +42,10 @@ public class ReviewDaoImpl implements ReviewDao {
     public Review update(Review review) {
         String sql = "UPDATE reviews SET content = ?, is_positive = ?, useful = ? WHERE review_id = ?";
         jdbcTemplate.update(sql,
-            review.getContent(),
-            review.getIsPositive(),
-            review.getUseful(),
-            review.getReviewId());
+                review.getContent(),
+                review.getIsPositive(),
+                review.getUseful(),
+                review.getReviewId());
         return review;
     }
 
@@ -121,11 +122,11 @@ public class ReviewDaoImpl implements ReviewDao {
 
     private void updateUseful(Long reviewId) {
         String sql = "UPDATE reviews SET useful = " +
-                     "(SELECT COUNT(*) FROM review_likes WHERE review_id = ? AND is_like = true) - "
-                     +
-                     "(SELECT COUNT(*) FROM review_likes WHERE review_id = ? AND is_like = false) "
-                     +
-                     "WHERE review_id = ?";
+                "(SELECT COUNT(*) FROM review_likes WHERE review_id = ? AND is_like = true) - "
+                +
+                "(SELECT COUNT(*) FROM review_likes WHERE review_id = ? AND is_like = false) "
+                +
+                "WHERE review_id = ?";
         jdbcTemplate.update(sql, reviewId, reviewId, reviewId);
     }
 }
