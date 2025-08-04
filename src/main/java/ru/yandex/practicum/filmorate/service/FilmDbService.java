@@ -65,15 +65,10 @@ public class FilmDbService {
      *
      * @param filmId уникальный идентификатор фильма
      * @param userId уникальный идентификатор пользователя
-     * @return пустой ответ с успешным статусом
      */
-    @DeleteMapping("/{filmId}/like/{userId}")
-    public ResponseEntity<Void> deleteLikeFilm(
-            @PathVariable("filmId") Long filmId,
-            @PathVariable("userId") Long userId) {
+    public void deleteLikeFilm(Long filmId, Long userId) {
         likeDao.deleteLike(userId, filmId);
         log.info("У фильма с id={} удален лайк от пользователя id={}", filmId, userId);
-        return ResponseEntity.noContent().build();
     }
 
     /**
