@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.storage.mapper;
 
 import ru.yandex.practicum.filmorate.model.Event;
-import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.constants.EventType;
 import ru.yandex.practicum.filmorate.model.constants.Operation;
 
