@@ -54,6 +54,8 @@ public class Film {
     @NotNull
     private Mpa mpa;
 
+    private Set<Director> directors;
+
     /**
      * Конструктор для инициализации объекта фильма основными полями.
      *

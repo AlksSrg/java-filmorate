@@ -143,4 +143,19 @@ public class FilmController {
         List<Film> commonFilms = filmService.getCommonFilms(userId, friendId);
         return ResponseEntity.ok(commonFilms);
     }
+
+    /**
+     * Поиск фильмов по названию и/или режиссёру
+     *
+     * @param query текст для поиска (обязательный параметр)
+     * @param by    параметры поиска: "director" (по режиссёру), "title" (по названию),
+     *              или оба значения через запятую (по умолчанию: "title,director")
+     * @return список фильмов, отсортированных по количеству лайков (популярности)
+     */
+    @GetMapping("/search")
+    public List<Film> searchFilms(
+        @RequestParam String query,
+        @RequestParam(defaultValue = "title,director") String by) {
+        return filmService.searchFilms(query, by);
+    }
 }

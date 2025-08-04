@@ -14,6 +14,8 @@ import ru.yandex.practicum.filmorate.storage.dao.like.LikeDao;
 import ru.yandex.practicum.filmorate.storage.dao.mpa.MpaDao;
 import ru.yandex.practicum.filmorate.storage.films.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
+import ru.yandex.practicum.filmorate.utils.FilmPopularityComparator;
+import ru.yandex.practicum.filmorate.utils.SearchParameterParser;
 import ru.yandex.practicum.filmorate.utils.ValidationUtils;
 
 import java.util.*;
@@ -47,6 +49,10 @@ public class FilmDbService {
      * Репозиторий для работы с лайками.
      */
     private final LikeDao likeDao;
+    /**
+     * Утилита для сравнения фильмов по популярности
+     */
+    private final FilmPopularityComparator filmPopularityComparator;
 
     /**
      * Добавляет лайк фильму от определенного пользователя.
@@ -263,5 +269,24 @@ public class FilmDbService {
                                 likesCountMap.getOrDefault(film.getId(), 0))
                         .reversed())
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * Реализует поиск фильмов по названию и/или режиссёру с сортировкой по популярности
+     *
+     * @param query текст для поиска (без учета регистра)
+     * @param by    параметры поиска: "director" (по режиссёру), "title" (по названию),
+     *              или оба значения через запятую (по умолчанию: "title,director")
+     * @return список фильмов, соответствующих критериям поиска, отсортированных по популярности
+     * @throws IllegalArgumentException если параметр 'by' содержит недопустимые значения
+     */
+    public List<Film> searchFilms(String query, String by) {
+        String[] searchParams = SearchParameterParser.parseSearchParameters(by);
+        String lowerCaseQuery = query.toLowerCase();
+
+        return getAllFilms().stream()
+            .filter(film -> ru.yandex.practicum.filmorate.utils.FilmSearchMatcher.matches(film, lowerCaseQuery, searchParams))
+            .sorted(filmPopularityComparator)
+            .collect(Collectors.toList());
     }
 }
