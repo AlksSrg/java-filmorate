@@ -1,13 +1,16 @@
 package ru.yandex.practicum.filmorate.storage.films;
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
-
-import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Реализация хранилища фильмов в памяти.
@@ -90,14 +93,34 @@ public class InMemoryFilmStorage implements FilmStorage {
      * Возврат набора жанров для фильма (метод заглушка).
      *
      * @param filmId идентификатор фильма
-     * @return временный объект Set<Genre>
+     * @return временный объект TreeSet<Genre>
      */
     @Override
-    public Set<Genre> getGenresByFilm(Long filmId) {
+    public TreeSet<Genre> getGenresByFilm(Long filmId) {
         // Тут временно возвращаем null, пока не будет полной реализации
         return null;
     }
 
+    @Override
+    public Collection<Film> getFilteredFilms(Integer genreId, Integer year) {
+        Collection<Film> result = films.values();
+
+        if (genreId != null) {
+            result = result.stream()
+                .filter(film -> film.getGenres() != null && film.getGenres().stream()
+                    .anyMatch(genre -> genre.getId().equals(genreId)))
+                .collect(Collectors.toList());
+        }
+
+        if (year != null) {
+            result = result.stream()
+                .filter(film -> film.getReleaseDate() != null &&
+                                film.getReleaseDate().getYear() == year)
+                .collect(Collectors.toList());
+        }
+
+        return result;
+    }
 
     /**
      * Пустая реализация метода из интерфейса
@@ -110,49 +133,8 @@ public class InMemoryFilmStorage implements FilmStorage {
         throw new UnsupportedOperationException("Метод не поддерживается в устаревшей реализации");
     }
 
-    /**
-     * Метод заглушка для неактуальной реализации.
-     */
     @Override
-    public Collection<Film> getFilmsByUser(Long id) {
-        return null;
-    }
-
-    @Override
-    public Collection<Film> getFilteredFilms(Integer genreId, Integer year) {
-        Collection<Film> result = films.values();
-
-        if (genreId != null) {
-            result = result.stream()
-                    .filter(film -> film.getGenres() != null && film.getGenres().stream()
-                            .anyMatch(genre -> genre.getId().equals(genreId)))
-                    .collect(Collectors.toList());
-        }
-
-        if (year != null) {
-            result = result.stream()
-                    .filter(film -> film.getReleaseDate() != null &&
-                            film.getReleaseDate().getYear() == year)
-                    .collect(Collectors.toList());
-        }
-
-        return result;
-    }
-
-    /**
-     * Возвращает список фильмов по их идентификаторам.
-     *
-     * @param filmIds набор идентификаторов фильмов
-     * @return список найденных фильмов или пустой список, если ничего не найдено
-     */
-    @Override
-    public List<Film> getFilmsByIds(Set<Long> filmIds) {
-        if (filmIds == null || filmIds.isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        return films.values().stream()
-                .filter(film -> filmIds.contains(film.getId()))
-                .collect(Collectors.toList());
+    public List<Film> searchFilms(String query, String by) {
+        return List.of();
     }
 }

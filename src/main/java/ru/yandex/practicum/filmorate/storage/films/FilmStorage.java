@@ -1,16 +1,16 @@
 package ru.yandex.practicum.filmorate.storage.films;
 
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
-
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
 
 /**
  * Интерфейс для работы с хранилищем фильмов.
  */
 public interface FilmStorage {
+
     /**
      * Сохраняет новый фильм в хранилище.
      *
@@ -67,18 +67,12 @@ public interface FilmStorage {
     void deleteById(long id);
 
     /**
-     * Метод предоставляет список фильмов которые понравились пользователю.
+     * Поиск фильмов по заданным критериям
      *
-     * @param id id пользователя для которого выгружаются понравившиеся фильмы.
-     * @return возвращает список понравившихся фильмов.
+     * @param query текст для поиска
+     * @param by    критерии поиска: "title" (по названию), "director" (по режиссеру) или
+     *              "title,director" (по обоим критериям)
+     * @return список найденных фильмов, отсортированных по популярности (по убыванию)
      */
-    Collection<Film> getFilmsByUser(Long id);
-
-    /**
-     * Возвращает список фильмов по их идентификаторам.
-     *
-     * @param filmIds набор идентификаторов фильмов
-     * @return список найденных фильмов
-     */
-    List<Film> getFilmsByIds(Set<Long> filmIds);
+    List<Film> searchFilms(String query, String by);
 }

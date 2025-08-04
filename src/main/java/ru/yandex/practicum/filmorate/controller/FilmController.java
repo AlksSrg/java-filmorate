@@ -2,17 +2,25 @@ package ru.yandex.practicum.filmorate.controller;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
+import java.util.Collection;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmDbService;
-
-import java.util.Collection;
-import java.util.List;
 
 /**
  * Класс-контроллер для работы с фильмами
@@ -58,7 +66,8 @@ public class FilmController {
      * @return пустой ответ с успешным статусом
      */
     @PutMapping("/{film_id}/like/{user_id}")
-    public ResponseEntity<Void> addLike(@PathVariable("film_id") Long filmId, @PathVariable("user_id") Long userId) {
+    public ResponseEntity<Void> addLike(@PathVariable("film_id") Long filmId,
+        @PathVariable("user_id") Long userId) {
         filmService.addLike(userId, filmId);
         return ResponseEntity.noContent().build();
     }
@@ -72,8 +81,9 @@ public class FilmController {
      * @return пустой ответ с успешным статусом
      */
     @DeleteMapping("/{film_id}/like/{id}")
-    public ResponseEntity<Void> deleteLikeFilm(@PathVariable("film_id") Long filmId, @PathVariable("id") Long userId) {
-        filmService.deleteLikeFilm(filmId, userId);
+    public ResponseEntity<Void> deleteLikeFilm(@PathVariable("film_id") Long filmId,
+        @PathVariable("id") Long userId) {
+        filmService.deleteLike(filmId, userId);
         log.info("У фильма с id={} удален лайк от пользователя id={}", filmId, userId);
         return ResponseEntity.noContent().build();
     }
@@ -109,9 +119,9 @@ public class FilmController {
      */
     @GetMapping("/popular")
     public Collection<Film> getPopularFilms(
-            @RequestParam(value = "count", defaultValue = "10") Integer count,
-            @RequestParam(value = "genreId", required = false) Integer genreId,
-            @RequestParam(value = "year", required = false) Integer year) {
+        @RequestParam(value = "count", defaultValue = "10") Integer count,
+        @RequestParam(value = "genreId", required = false) Integer genreId,
+        @RequestParam(value = "year", required = false) Integer year) {
         log.info("Запрос популярных фильмов: count={}, genreId={}, year={}", count, genreId, year);
         return filmService.getPopularFilms(count, genreId, year);
     }
@@ -129,33 +139,16 @@ public class FilmController {
     }
 
     /**
-     * Возвращает список общих фильмов между двумя пользователями, отсортированных по популярности.
-     *
-     * @param userId   идентификатор первого пользователя
-     * @param friendId идентификатор второго пользователя
-     * @return список общих фильмов
-     */
-    @GetMapping("/common")
-    public ResponseEntity<List<Film>> getCommonFilms(
-            @RequestParam("userId") Long userId,
-            @RequestParam("friendId") Long friendId) {
-        log.info("Запрос общих фильмов для пользователей {} и {}", userId, friendId);
-        List<Film> commonFilms = filmService.getCommonFilms(userId, friendId);
-        return ResponseEntity.ok(commonFilms);
-    }
-
-    /**
-     * Поиск фильмов по названию и/или режиссёру
+     * Поиск фильмов по названию и/или режиссеру
      *
      * @param query текст для поиска (обязательный параметр)
-     * @param by    параметры поиска: "director" (по режиссёру), "title" (по названию),
-     *              или оба значения через запятую (по умолчанию: "title,director")
-     * @return список фильмов, отсортированных по количеству лайков (популярности)
+     * @param by    критерии поиска: "title" (по умолчанию), "director" или "title,director"
+     * @return список найденных фильмов в формате JSON
      */
     @GetMapping("/search")
     public List<Film> searchFilms(
         @RequestParam String query,
-        @RequestParam(defaultValue = "title,director") String by) {
+        @RequestParam(defaultValue = "title") String by) {
         return filmService.searchFilms(query, by);
     }
 }

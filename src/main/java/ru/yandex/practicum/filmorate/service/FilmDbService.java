@@ -1,25 +1,25 @@
 package ru.yandex.practicum.filmorate.service;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
+import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.dao.genre.GenreDao;
 import ru.yandex.practicum.filmorate.storage.dao.like.LikeDao;
 import ru.yandex.practicum.filmorate.storage.dao.mpa.MpaDao;
 import ru.yandex.practicum.filmorate.storage.films.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
-import ru.yandex.practicum.filmorate.utils.FilmPopularityComparator;
-import ru.yandex.practicum.filmorate.utils.SearchParameterParser;
 import ru.yandex.practicum.filmorate.utils.ValidationUtils;
-
-import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Сервис для обработки бизнес-логики, связанной с фильмами.
@@ -49,10 +49,6 @@ public class FilmDbService {
      * Репозиторий для работы с лайками.
      */
     private final LikeDao likeDao;
-    /**
-     * Утилита для сравнения фильмов по популярности
-     */
-    private final FilmPopularityComparator filmPopularityComparator;
 
     /**
      * Добавляет лайк фильму от определенного пользователя.
@@ -67,14 +63,14 @@ public class FilmDbService {
     }
 
     /**
-     * Убирает лайк у фильма от конкретного пользователя.
+     * Удаляет лайк у фильма от определенного пользователя.
      *
-     * @param filmId уникальный идентификатор фильма
-     * @param userId уникальный идентификатор пользователя
+     * @param userId идентификатор пользователя
+     * @param filmId идентификатор фильма
      */
-    public void deleteLikeFilm(Long filmId, Long userId) {
+    public void deleteLike(Long userId, Long filmId) {
         likeDao.deleteLike(userId, filmId);
-        log.info("У фильма с id={} удален лайк от пользователя id={}", filmId, userId);
+        log.info("Пользователь с id {} удалил лайк у фильма с id {}", userId, filmId);
     }
 
     /**
@@ -92,14 +88,14 @@ public class FilmDbService {
 
         List<Film> films = new ArrayList<>(filmStorage.getFilteredFilms(genreId, year));
         return films.stream()
-                .sorted(Comparator.comparingInt((Film film) -> {
-                            int likes = likeDao.checkLikes(film.getId());
-                            return likes < 0 ? 0 : likes;
-                        }).reversed()
-                        .thenComparing(Film::getReleaseDate, Comparator.reverseOrder()))
-                .limit(topNumber)
-                .peek(this::enrichFilmWithDetails)
-                .collect(Collectors.toList());
+            .sorted(Comparator.comparingInt((Film film) -> {
+                    int likes = likeDao.checkLikes(film.getId());
+                    return likes < 0 ? 0 : likes;
+                }).reversed()
+                .thenComparing(Film::getReleaseDate, Comparator.reverseOrder()))
+            .limit(topNumber)
+            .peek(this::enrichFilmWithDetails)
+            .collect(Collectors.toList());
     }
 
     /**
@@ -170,8 +166,8 @@ public class FilmDbService {
      */
     public Collection<Film> getAllFilms() {
         return filmStorage.getFilms().stream()
-                .peek(this::enrichFilmWithDetails)
-                .collect(Collectors.toList());
+            .peek(this::enrichFilmWithDetails)
+            .collect(Collectors.toList());
     }
 
     /**
@@ -212,81 +208,24 @@ public class FilmDbService {
     }
 
     /**
-     * Метод предоставляет список фильмов которые понравились пользователю.
+     * Поиск фильмов с валидацией параметров
      *
-     * @param id id пользователя для которого выгружаются понравившиеся фильмы.
-     * @return возвращает список понравившихся фильмов.
+     * @param query текст для поиска (не должен быть пустым)
+     * @param by    критерии поиска (должен соответствовать формату "title", "director" или
+     *              "title,director")
+     * @return список найденных фильмов
+     * @throws ValidationException при некорректных параметрах запроса
      */
-    public Collection<Film> getFilmsByUser(Long id) {
-        Collection<Film> films = filmStorage.getFilmsByUser(id);
-        for (Film film : films) {
-            film.setGenres(filmStorage.getGenresByFilm(film.getId()));
-            film.setMpa(mpaDao.getMpaById(film.getMpa().getId()));
-        }
-        return films;
-    }
-
-    /**
-     * Возвращает список общих фильмов между двумя пользователями, отсортированных по популярности.
-     *
-     * @param userId   идентификатор первого пользователя
-     * @param friendId идентификатор второго пользователя
-     * @return список общих фильмов, отсортированных по количеству лайков
-     * @throws EntityNotFoundException если один из пользователей не найден
-     */
-    public List<Film> getCommonFilms(Long userId, Long friendId) {
-        // Проверяем существование пользователей
-        userStorage.getUserById(userId);
-        userStorage.getUserById(friendId);
-
-        // Получаем ID фильмов с лайками каждого пользователя
-        Set<Long> userLikedFilms = likeDao.getLikedFilms(userId);
-        Set<Long> friendLikedFilms = likeDao.getLikedFilms(friendId);
-
-        // Находим пересечение
-        Set<Long> commonFilmIds = userLikedFilms.stream()
-                .filter(friendLikedFilms::contains)
-                .collect(Collectors.toSet());
-
-        if (commonFilmIds.isEmpty()) {
+    public List<Film> searchFilms(String query, String by) {
+        if (query == null || query.isBlank()) {
             return Collections.emptyList();
         }
 
-        // Получаем все фильмы за один запрос
-        List<Film> films = filmStorage.getFilmsByIds(commonFilmIds);
+        if (!by.matches("^(title|director)(,(title|director))?$")) {
+            throw new ValidationException(
+                "Parameter 'by' must be 'title', 'director' or 'title,director'");
+        }
 
-        // Получаем количество лайков для всех фильмов
-        Map<Long, Integer> likesCountMap = commonFilmIds.stream()
-                .collect(Collectors.toMap(
-                        filmId -> filmId,
-                        likeDao::getLikesCount
-                ));
-
-
-        return films.stream()
-                .peek(this::enrichFilmWithDetails)
-                .sorted(Comparator.comparingInt((Film film) ->
-                                likesCountMap.getOrDefault(film.getId(), 0))
-                        .reversed())
-                .collect(Collectors.toList());
-    }
-
-    /**
-     * Реализует поиск фильмов по названию и/или режиссёру с сортировкой по популярности
-     *
-     * @param query текст для поиска (без учета регистра)
-     * @param by    параметры поиска: "director" (по режиссёру), "title" (по названию),
-     *              или оба значения через запятую (по умолчанию: "title,director")
-     * @return список фильмов, соответствующих критериям поиска, отсортированных по популярности
-     * @throws IllegalArgumentException если параметр 'by' содержит недопустимые значения
-     */
-    public List<Film> searchFilms(String query, String by) {
-        String[] searchParams = SearchParameterParser.parseSearchParameters(by);
-        String lowerCaseQuery = query.toLowerCase();
-
-        return getAllFilms().stream()
-            .filter(film -> ru.yandex.practicum.filmorate.utils.FilmSearchMatcher.matches(film, lowerCaseQuery, searchParams))
-            .sorted(filmPopularityComparator)
-            .collect(Collectors.toList());
+        return filmStorage.searchFilms(query, by);
     }
 }
