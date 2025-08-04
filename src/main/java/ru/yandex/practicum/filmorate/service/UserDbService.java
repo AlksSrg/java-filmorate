@@ -5,8 +5,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
+import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.model.constants.EventType;
+import ru.yandex.practicum.filmorate.model.constants.Operation;
+import ru.yandex.practicum.filmorate.storage.dao.event.EventDao;
 import ru.yandex.practicum.filmorate.storage.dao.friends.FriendDao;
 import ru.yandex.practicum.filmorate.storage.dao.genre.GenreDao;
 import ru.yandex.practicum.filmorate.storage.dao.like.LikeDao;
@@ -57,6 +61,11 @@ public class UserDbService {
     private final FilmStorage filmStorage;
 
     /**
+     * Репозиторий для работы с событиями.
+     */
+    private final EventDao eventDao;
+
+    /**
      * Регистрирует нового пользователя.
      *
      * @param user объект пользователя для регистрации
@@ -103,6 +112,7 @@ public class UserDbService {
         if (userId > 0 && idFriend > 0) {
             boolean status = friendDao.statusFriend(userId, idFriend);
             friendDao.addFriends(userId, idFriend, status);
+            eventDao.addEvent(userId, EventType.FRIEND, Operation.ADD, idFriend);
             log.info("Пользователи с id {} и {} добавлены друг другу в друзья", userId, idFriend);
         } else {
             throw new EntityNotFoundException(String.format("Введен не верный id пользователя %s или друга %s", userId, idFriend));
@@ -125,6 +135,7 @@ public class UserDbService {
         if (userOptional.isPresent() && friendOptional.isPresent()) {
             // Выполняем удаление дружбы
             friendDao.deleteFriends(userId, idFriend);
+            eventDao.addEvent(userId, EventType.FRIEND, Operation.REMOVE, idFriend);
             log.info("Пользователь с id {} и {} удалены друг у друга из друзей", userId, idFriend);
         } else {
             // Если пользователь или друг не найден, бросаем исключение
@@ -232,5 +243,17 @@ public class UserDbService {
         recommendations.removeAll(userLikes);
 
         return filmStorage.getFilmsByIds(recommendations);
+    }
+
+    /**
+     * Возвращает ленту событий пользователя.
+     *
+     * @param userId идентификатор пользователя
+     * @return список событий друзей пользователя
+     */
+    public List<Event> getUserFeed(Long userId) {
+        // Проверяем существование пользователя
+        getUserById(userId);
+        return eventDao.getUserFeed(userId);
     }
 }
