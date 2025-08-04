@@ -72,14 +72,10 @@ public class FilmDbService {
      *
      * @param filmId уникальный идентификатор фильма
      * @param userId уникальный идентификатор пользователя
-     * @return пустой ответ с успешным статусом
      */
-    public void deleteLike(Long userId, Long filmId) {
-        //Для проверки
-        User user = userStorage.getUserById(userId);
-        Film film = filmStorage.getFilmById(filmId);
-        likeDao.deleteLike(user.getId(), film.getId());
-        log.info("Пользователь с id {} удалил лайк у фильма с id {}", userId, filmId);
+    public void deleteLikeFilm(Long filmId, Long userId) {
+        likeDao.deleteLike(userId, filmId);
+        log.info("У фильма с id={} удален лайк от пользователя id={}", filmId, userId);
     }
 
     /**
