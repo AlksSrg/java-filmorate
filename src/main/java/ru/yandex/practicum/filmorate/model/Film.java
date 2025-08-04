@@ -1,12 +1,15 @@
 package ru.yandex.practicum.filmorate.model;
 
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Past;
+import jakarta.validation.constraints.PositiveOrZero;
+import jakarta.validation.constraints.Size;
+import java.time.LocalDate;
+import java.util.Set;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Length;
-
-import java.time.LocalDate;
-import java.util.Set;
 
 @Data
 @NoArgsConstructor
@@ -53,6 +56,8 @@ public class Film {
      */
     @NotNull
     private Mpa mpa;
+
+    private Set<Director> directors;
 
     /**
      * Конструктор для инициализации объекта фильма основными полями.
