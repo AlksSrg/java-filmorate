@@ -179,7 +179,7 @@ public class FilmController {
      */
     @GetMapping("/director/{directorId}")
     public Collection<Film> getFilmsByDirector(@PathVariable @Positive Long directorId,
-                                               @RequestParam @NotNull String sortBy) {
+        @RequestParam @NotNull String sortBy) {
         return filmService.getFilmsByDirector(directorId, sortBy);
     }
 }

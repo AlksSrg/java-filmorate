@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.service;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -28,10 +29,6 @@ import ru.yandex.practicum.filmorate.utils.FilmPopularityComparator;
 import ru.yandex.practicum.filmorate.utils.FilmSearchMatcher;
 import ru.yandex.practicum.filmorate.utils.SearchParameterParser;
 import ru.yandex.practicum.filmorate.utils.ValidationUtils;
-
-import java.time.LocalDate;
-import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Сервис для обработки бизнес-логики, связанной с фильмами.
@@ -159,7 +156,6 @@ public class FilmDbService {
             film.setReleaseDate(currentFilm.getReleaseDate());
         }
 
-
         Film updatedFilm = filmStorage.updateFilm(film);
 
         genreDao.updateGenres(film.getId(), film.getGenres());
@@ -271,10 +267,12 @@ public class FilmDbService {
      */
     public Collection<Film> getFilmsByDirector(Long directorId, String sort) {
         if (directorStorage.getDirectorById(directorId) == null) {
-            throw new EntityNotFoundException(String.format("Режиссера с таким id - %s не существует.", directorId));
+            throw new EntityNotFoundException(
+                String.format("Режиссера с таким id - %s не существует.", directorId));
         }
         if (!sort.equals("year") && !sort.equals("likes")) {
-            throw new EntityNotFoundException(String.format("Нет сортировки по указанному параметру %s", sort));
+            throw new EntityNotFoundException(
+                String.format("Нет сортировки по указанному параметру %s", sort));
         }
 
         Collection<Film> films = filmStorage.getFilmsByDirector(directorId, sort);
