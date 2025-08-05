@@ -4,7 +4,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.Review;
-import ru.yandex.practicum.filmorate.storage.mapper.ReviewMapper;
+import ru.yandex.practicum.filmorate.storage.mapper.FilmReviewMapper;
 
 import java.util.HashMap;
 import java.util.List;
@@ -58,20 +58,20 @@ public class ReviewDaoImpl implements ReviewDao {
     @Override
     public Optional<Review> findById(Long id) {
         String sql = "SELECT * FROM reviews WHERE review_id = ?";
-        List<Review> reviews = jdbcTemplate.query(sql, new ReviewMapper(), id);
+        List<Review> reviews = jdbcTemplate.query(sql, new FilmReviewMapper(), id);
         return reviews.stream().findFirst();
     }
 
     @Override
     public List<Review> findByFilmId(Long filmId, int count) {
         String sql = "SELECT * FROM reviews WHERE film_id = ? ORDER BY useful DESC LIMIT ?";
-        return jdbcTemplate.query(sql, new ReviewMapper(), filmId, count);
+        return jdbcTemplate.query(sql, new FilmReviewMapper(), filmId, count);
     }
 
     @Override
     public List<Review> findAll(int count) {
         String sql = "SELECT * FROM reviews ORDER BY useful DESC LIMIT ?";
-        return jdbcTemplate.query(sql, new ReviewMapper(), count);
+        return jdbcTemplate.query(sql, new FilmReviewMapper(), count);
     }
 
     @Override
