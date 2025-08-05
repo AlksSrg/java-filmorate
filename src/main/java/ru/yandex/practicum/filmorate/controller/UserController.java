@@ -5,6 +5,7 @@ import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserDbService;
@@ -82,6 +83,17 @@ public class UserController {
     @GetMapping("{id}/friends")
     public ResponseEntity<Collection<User>> getFriends(@PathVariable Long id) {
         return ResponseEntity.ok(userService.getFriends(id));
+    }
+
+    /**
+     * Возвращает ленту событий пользователя
+     *
+     * @param id идентификатор пользователя
+     * @return список событий пользователя
+     */
+    @GetMapping("/{id}/feed")
+    public ResponseEntity<List<Event>> getUserFeed(@PathVariable Long id) {
+        return ResponseEntity.ok(userService.getUserFeed((id)));
     }
 
     /**

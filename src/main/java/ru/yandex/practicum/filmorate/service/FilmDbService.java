@@ -17,6 +17,9 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.constants.EventType;
+import ru.yandex.practicum.filmorate.model.constants.Operation;
+import ru.yandex.practicum.filmorate.storage.dao.event.EventDao;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.storage.dao.genre.GenreDao;
@@ -69,6 +72,11 @@ public class FilmDbService {
     private final DirectorStorage directorStorage;
 
     /**
+     * Репозиторий для работы с событиями.
+     */
+    private final EventDao eventDao;
+
+    /**
      * Добавляет лайк фильму от определенного пользователя.
      *
      * @param userId идентификатор пользователя
@@ -77,6 +85,7 @@ public class FilmDbService {
     public void addLike(Long userId, Long filmId) {
         checkExistence(userId, filmId);
         likeDao.addLike(userId, filmId);
+        eventDao.addEvent(userId, EventType.LIKE, Operation.ADD, filmId);
         log.info("Пользователь с id {} поставил лайк фильму с id {}", userId, filmId);
     }
 
@@ -88,6 +97,7 @@ public class FilmDbService {
      */
     public void deleteLikeFilm(Long filmId, Long userId) {
         likeDao.deleteLike(userId, filmId);
+        eventDao.addEvent(userId, EventType.LIKE, Operation.REMOVE, filmId);
         log.info("У фильма с id={} удален лайк от пользователя id={}", filmId, userId);
     }
 

@@ -4,6 +4,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.model.Review;
+import ru.yandex.practicum.filmorate.model.constants.EventType;
+import ru.yandex.practicum.filmorate.model.constants.Operation;
+import ru.yandex.practicum.filmorate.storage.dao.event.EventDao;
 import ru.yandex.practicum.filmorate.storage.dao.review.ReviewDao;
 import ru.yandex.practicum.filmorate.storage.films.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
@@ -19,27 +22,34 @@ public class ReviewService {
     private final ReviewDao reviewDao;
     private final UserStorage userStorage;
     private final FilmStorage filmStorage;
+    private final EventDao eventDao;
 
     @Autowired
-    public ReviewService(ReviewDao reviewDao, UserStorage userStorage, FilmStorage filmStorage) {
+    public ReviewService(ReviewDao reviewDao, UserStorage userStorage, FilmStorage filmStorage, EventDao eventDao) {
         this.reviewDao = reviewDao;
         this.userStorage = userStorage;
         this.filmStorage = filmStorage;
+        this.eventDao = eventDao;
     }
 
     public Review create(Review review) {
         validateUserAndFilm(review.getUserId(), review.getFilmId());
-        return reviewDao.create(review);
+        Review createdReview = reviewDao.create(review);
+        eventDao.addEvent(review.getUserId(), EventType.REVIEW, Operation.ADD, createdReview.getReviewId());
+        return createdReview;
     }
 
     public Review update(Review review) {
         getById(review.getReviewId());
-        return reviewDao.update(review);
+        Review updatedReview = reviewDao.update(review);
+        eventDao.addEvent(review.getUserId(), EventType.REVIEW, Operation.UPDATE, updatedReview.getReviewId());
+        return updatedReview;
     }
 
     public void delete(Long id) {
-        getById(id);
+        Review review = getById(id);
         reviewDao.delete(id);
+        eventDao.addEvent(review.getUserId(), EventType.REVIEW, Operation.REMOVE, id);
     }
 
     public Review getById(Long id) {
