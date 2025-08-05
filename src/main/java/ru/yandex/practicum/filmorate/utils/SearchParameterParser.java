@@ -20,8 +20,8 @@ public class SearchParameterParser {
         for (String param : params) {
             String trimmedParam = param.trim();
             if (!"title".equals(trimmedParam) && !"director".equals(trimmedParam)) {
-                throw new IllegalArgumentException("Invalid search parameter: " + trimmedParam +
-                                                   ". Allowed values: 'title', 'director'");
+                throw new IllegalArgumentException("Недопустимый параметр поиска: " + trimmedParam +
+                                                   ". Допустимые значения: 'title', 'director'.");
             }
         }
         return params;

@@ -352,9 +352,15 @@ public class FilmDbService {
         String[] searchParams = SearchParameterParser.parseSearchParameters(by);
         String lowerCaseQuery = query.toLowerCase();
 
-        return getAllFilms().stream()
+        Collection<Film> allFilms = getAllFilms();
+
+        Map<Long, Integer> likesCountMap = likeDao.getLikesCountForAllFilms();
+
+        Comparator<Film> comparator = new FilmPopularityComparator(likesCountMap);
+
+        return allFilms.stream()
             .filter(film -> FilmSearchMatcher.matches(film, lowerCaseQuery, searchParams))
-            .sorted(filmPopularityComparator)
+            .sorted(comparator)
             .collect(Collectors.toList());
     }
 }
