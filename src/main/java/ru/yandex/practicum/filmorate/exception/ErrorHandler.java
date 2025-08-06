@@ -10,6 +10,11 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.util.Collections;
 import java.util.Map;
 
+/**
+ * Глобальный обработчик исключений для REST контроллеров.
+ * Обеспечивает единообразную обработку ошибок и формирование ответов.
+ */
+
 @RestControllerAdvice
 public class ErrorHandler {
 
@@ -69,7 +74,7 @@ public class ErrorHandler {
      * @return сформированный ответ с телом, содержащим ошибку
      */
     private ResponseEntity<Map<String, Object>> createErrorResponse(String message, HttpStatus status) {
-        Map<String, Object> errorResponse = Collections.singletonMap("message", message);
+        Map<String, Object> errorResponse = Collections.singletonMap("error", message);
         return ResponseEntity.status(status).body(errorResponse);
     }
 }

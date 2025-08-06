@@ -18,6 +18,12 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.util.*;
+import java.util.stream.Collectors;
+
+/**
+ * Реализация хранилища пользователей в базе данных.
+ * Является основной реализацией ({@link Primary}) интерфейса {@link FilmStorage}.
+ */
 
 @Slf4j
 @Component("FilmDbStorage")
@@ -97,5 +103,71 @@ public class FilmDbStorage implements FilmStorage {
         genresByFilm.addAll(genresList);
 
         return genresByFilm;
+    }
+
+    @Override
+    public void deleteById(long id) {
+        if (jdbcTemplate.update("DELETE FROM film WHERE film_id = ?", id) == 0) {
+            throw new EntityNotFoundException(String.format("Фильма с id %s и так не существует", id));
+        }
+    }
+
+    @Override
+    public Collection<Film> getFilmsByUser(Long id) {
+        return jdbcTemplate
+                .query("SELECT * FROM film WHERE film_id IN (SELECT film_id FROM likes WHERE user_id = ?)",
+                        new FilmMapper(), id);
+    }
+
+    @Override
+    public Collection<Film> getFilteredFilms(Integer genreId, Integer year) {
+        StringBuilder sql = new StringBuilder("SELECT f.* FROM film f");
+        List<Object> params = new ArrayList<>();
+
+        if (genreId != null) {
+            sql.append(" JOIN film_genre fg ON f.film_id = fg.film_id WHERE fg.genre_id = ?");
+            params.add(genreId);
+        }
+
+        if (year != null) {
+            sql.append(genreId != null ? " AND" : " WHERE").append(" EXTRACT(YEAR FROM f.release_date) = ?");
+            params.add(year);
+        }
+
+        try {
+            return jdbcTemplate.query(sql.toString(), new FilmMapper(), params.toArray());
+        } catch (EmptyResultDataAccessException e) {
+            return Collections.emptyList();
+        }
+    }
+
+    @Override
+    public List<Film> getFilmsByIds(Set<Long> filmIds) {
+        if (filmIds.isEmpty()) return Collections.emptyList();
+        String sql = "SELECT * FROM film WHERE film_id IN (" +
+                filmIds.stream().map(String::valueOf).collect(Collectors.joining(",")) + ")";
+        return jdbcTemplate.query(sql, new FilmMapper());
+    }
+
+    @Override
+    public Collection<Film> getFilmsByDirector(Long directorId, String sortBy) {
+        String sql;
+        if (sortBy.equals("year")) {
+            sql = """
+                    SELECT f.* FROM film f
+                    WHERE f.film_id IN (SELECT film_id FROM film_director WHERE director_id = ?)
+                    ORDER BY EXTRACT(YEAR FROM f.release_date)""";
+        } else if (sortBy.equals("likes")) {
+            sql = """
+                    SELECT f.* FROM film f
+                    INNER JOIN film_director fd ON f.film_id = fd.film_id
+                    LEFT JOIN (SELECT film_id, COUNT(user_id) AS user_likes FROM likes
+                    GROUP BY film_id ORDER BY user_likes DESC) AS l ON f.film_id = l.film_id
+                    WHERE fd.director_id = ?
+                    ORDER BY l.user_likes DESC""";
+        } else {
+            return new ArrayList<>();
+        }
+        return jdbcTemplate.query(sql, new FilmMapper(), directorId);
     }
 }

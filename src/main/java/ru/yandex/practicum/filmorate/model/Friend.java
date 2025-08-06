@@ -1,26 +1,38 @@
 package ru.yandex.practicum.filmorate.model;
 
+import jakarta.validation.constraints.Positive;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Модель дружеской связи между пользователями.
+ * Содержит информацию о пользователях и статусе их дружбы.
+ */
+
 @Data
+@Builder
 @NoArgsConstructor
+@AllArgsConstructor
 public class Friend {
 
     /**
-     * Идентификатор пользователя.
+     * Идентификатор пользователя. Должен быть положительным числом.
      */
+    @Positive(message = "ID пользователя должен быть положительным числом")
     private Long userId;
 
     /**
-     * Идентификатор друга пользователя.
+     * Идентификатор друга пользователя. Должен быть положительным числом.
      */
+    @Positive(message = "ID друга должен быть положительным числом")
     private Long friendId;
 
     /**
-     * Статус отношений:
-     * true — дружеские отношения установлены,
-     * false — отправлен запрос на установление дружбы.
+     * Статус дружбы между пользователями:
+     * true - дружба подтверждена (взаимная),
+     * false - запрос на дружбу ожидает подтверждения.
      */
     boolean status;
 }

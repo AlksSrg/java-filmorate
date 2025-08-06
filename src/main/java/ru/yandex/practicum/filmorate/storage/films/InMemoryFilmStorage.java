@@ -6,14 +6,13 @@ import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.TreeSet;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
- * Реализация хранилища фильмов в памяти.
+ * Класс хранилища фильмов в оперативной памяти.
  */
+
 @Component("InMemoryFilmStorage")
 @Slf4j
 public class InMemoryFilmStorage implements FilmStorage {
@@ -89,14 +88,97 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     /**
-     * Возврат набора жанров для фильма (метод заглушка).
+     * Возвращает набора жанров для фильма (метод заглушка).
      *
      * @param filmId идентификатор фильма
-     * @return временный объект TreeSet<Genre>
+     * @return временный объект Set<Genre>
      */
     @Override
-    public TreeSet<Genre> getGenresByFilm(Long filmId) {
+    public Set<Genre> getGenresByFilm(Long filmId) {
         // Тут временно возвращаем null, пока не будет полной реализации
+        return null;
+    }
+
+
+    /**
+     * Пустая реализация метода из интерфейса
+     *
+     * @param id идентификатор фильма
+     */
+    @Override
+    public void deleteById(long id) {
+        log.warn("Использование устаревшей реализации");
+        throw new UnsupportedOperationException("Метод не поддерживается в устаревшей реализации");
+    }
+
+    /**
+     * Метод заглушка для неактуальной реализации.
+     */
+    @Override
+    public Collection<Film> getFilmsByUser(Long id) {
+        return null;
+    }
+
+    /**
+     * Возвращает список фильмов, отфильтрованных по заданным критериям.
+     * Поддерживает фильтрацию по жанру и году выпуска как отдельно, так и в комбинации.
+     *
+     * @param genreId идентификатор жанра для фильтрации (может быть null)
+     * @param year    год выпуска для фильтрации (может быть null)
+     * @return список фильмов, соответствующих критериям фильтрации.
+     * Если критерии не заданы, возвращает все фильмы.
+     * Если ни один фильм не соответствует критериям, возвращает пустой список.
+     *
+     * <p>Логика фильтрации:</p>
+     * <ul>
+     *   <li>При указании genreId: выбирает фильмы, содержащие данный жанр</li>
+     *   <li>При указании year: выбирает фильмы, выпущенные в указанном году</li>
+     *   <li>При указании обоих параметров: применяет оба фильтра последовательно</li>
+     * </ul>
+     */
+    @Override
+    public Collection<Film> getFilteredFilms(Integer genreId, Integer year) {
+        Collection<Film> result = films.values();
+
+        if (genreId != null) {
+            result = result.stream()
+                    .filter(film -> film.getGenres() != null && film.getGenres().stream()
+                            .anyMatch(genre -> genre.getId().equals(genreId)))
+                    .collect(Collectors.toList());
+        }
+
+        if (year != null) {
+            result = result.stream()
+                    .filter(film -> film.getReleaseDate() != null &&
+                            film.getReleaseDate().getYear() == year)
+                    .collect(Collectors.toList());
+        }
+
+        return result;
+    }
+
+    /**
+     * Возвращает список фильмов по их идентификаторам.
+     *
+     * @param filmIds набор идентификаторов фильмов
+     * @return список найденных фильмов или пустой список, если ничего не найдено
+     */
+    @Override
+    public List<Film> getFilmsByIds(Set<Long> filmIds) {
+        if (filmIds == null || filmIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        return films.values().stream()
+                .filter(film -> filmIds.contains(film.getId()))
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Метод заглушка для неактуальной реализации.
+     */
+    @Override
+    public Collection<Film> getFilmsByDirector(Long directorId, String sortBy) {
         return null;
     }
 }

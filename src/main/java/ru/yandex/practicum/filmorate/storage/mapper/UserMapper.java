@@ -9,6 +9,7 @@ import java.sql.SQLException;
 /**
  * Класс маппера для преобразования строк базы данных в объекты типа {@link User}.
  */
+
 public class UserMapper implements RowMapper<User> {
 
     /**

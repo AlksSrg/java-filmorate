@@ -14,6 +14,12 @@ import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 import java.sql.Date;
 import java.util.Collection;
 
+/**
+ * Реализация DAO для работы с пользователями.
+ * Обеспечивает доступ к данным о пользователях.
+ */
+
+
 @AllArgsConstructor
 @Component
 public class UserDaoImpl implements UserStorage {
@@ -57,6 +63,13 @@ public class UserDaoImpl implements UserStorage {
             return jdbcTemplate.queryForObject("SELECT * FROM users WHERE user_id = ?", new UserMapper(), id);
         } catch (EmptyResultDataAccessException e) {
             throw new EntityNotFoundException("Пользователь с id " + id + " не найден");
+        }
+    }
+
+    @Override
+    public void deleteById(long id) {
+        if (jdbcTemplate.update("DELETE FROM users WHERE user_id = ?", id) == 0) {
+            throw new EntityNotFoundException(String.format("Пользователя с id %s и так не существует", id));
         }
     }
 }
