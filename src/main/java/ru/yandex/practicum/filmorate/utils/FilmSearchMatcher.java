@@ -23,7 +23,7 @@ public class FilmSearchMatcher {
                 return true;
             }
             if ("director".equals(param) && film.getDirectors().stream()
-                .anyMatch(d -> d.getName().toLowerCase().contains(query))) {
+                    .anyMatch(d -> d.getName().toLowerCase().contains(query))) {
                 return true;
             }
         }

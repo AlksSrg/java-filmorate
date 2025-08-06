@@ -11,6 +11,11 @@ import ru.yandex.practicum.filmorate.storage.mapper.GenreMapper;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * Реализация DAO для работы с жанрами фильмов.
+ * Обеспечивает хранение и получение жанров в базе данных.
+ */
+
 @AllArgsConstructor
 @Component
 public class GenreDaoImpl implements GenreDao {
@@ -49,8 +54,17 @@ public class GenreDaoImpl implements GenreDao {
     @Override
     public void updateGenres(Long filmId, Set<Genre> genres) {
         deleteGenres(filmId);
-        if (genres != null) {
-            addGenres(filmId, genres);
+
+        if (genres != null && !genres.isEmpty()) {
+            List<Object[]> batchArgs = genres.stream()
+                    .sorted(Comparator.comparing(Genre::getId))
+                    .map(genre -> new Object[]{filmId, genre.getId()})
+                    .collect(Collectors.toList());
+
+            jdbcTemplate.batchUpdate(
+                    "INSERT INTO film_genre (film_id, genre_id) VALUES (?, ?)",
+                    batchArgs
+            );
         }
     }
 
@@ -74,8 +88,10 @@ public class GenreDaoImpl implements GenreDao {
                 SELECT fg.film_id, g.genre_id, g.genre_name
                 FROM film_genre fg
                 JOIN genre g ON fg.genre_id = g.genre_id
-                WHERE fg.film_id IN (%s)""".formatted(filmIds.stream().map(id -> "?")
+                WHERE fg.film_id IN (%s)
+                ORDER BY g.genre_id""".formatted(filmIds.stream().map(id -> "?")
                 .collect(Collectors.joining(", ")));
+
         return jdbcTemplate.query(sql, filmIds.toArray(), (rs) -> {
             Map<Long, Set<Genre>> genreMap = new HashMap<>();
             while (rs.next()) {
@@ -84,7 +100,7 @@ public class GenreDaoImpl implements GenreDao {
                 genre.setName(rs.getString("genre_name"));
 
                 Long filmId = rs.getLong("film_id");
-                genreMap.computeIfAbsent(filmId, k -> new HashSet<>()).add(genre);
+                genreMap.computeIfAbsent(filmId, k -> new TreeSet<>(Comparator.comparing(Genre::getId))).add(genre);
             }
             return genreMap;
         });

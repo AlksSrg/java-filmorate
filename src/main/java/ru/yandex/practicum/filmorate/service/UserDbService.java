@@ -5,9 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
-import ru.yandex.practicum.filmorate.model.Event;
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.model.*;
 import ru.yandex.practicum.filmorate.model.constants.EventType;
 import ru.yandex.practicum.filmorate.model.constants.Operation;
 import ru.yandex.practicum.filmorate.storage.dao.event.EventDao;
@@ -23,8 +21,24 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * Сервис для обработки запросов, связанных с пользователями.
+ * Сервис для работы с пользователями.
+ * Реализует комплексную бизнес-логику, включая:
+ * <ul>
+ *   <li>CRUD операции с пользователями</li>
+ *   <li>Управление дружескими связями</li>
+ *   <li>Формирование рекомендаций фильмов</li>
+ *   <li>Работу с лентой событий</li>
+ * </ul>
+ *
+ * <p>Использует:</p>
+ * <ul>
+ *   <li>{@link UserStorage} для хранения пользователей</li>
+ *   <li>{@link FriendDao} для управления друзьями</li>
+ *   <li>{@link LikeDao} для работы с лайками</li>
+ *   <li>{@link FilmDbService} для получения рекомендаций</li>
+ * </ul>
  */
+
 @Getter
 @Service
 @RequiredArgsConstructor
@@ -194,7 +208,7 @@ public class UserDbService {
     }
 
     /**
-     * Удаление пользователя по id.
+     * Удаляет пользователя по id.
      *
      * @param id идентификатор пользователя
      */
@@ -204,11 +218,15 @@ public class UserDbService {
 
 
     /**
-     * Предоставляет рекомендации фильмов для пользователя на основании предыдущих выборов (лайков).
+     * Формирует рекомендации фильмов для пользователя на основе схожих вкусов.
+     * Алгоритм:
+     * 1. Находит пользователя с максимальным совпадением лайков
+     * 2. Рекомендует фильмы, которые понравились этому пользователю, но не текущему
+     * 3. Возвращает список, отсортированный по популярности
      *
-     * @param id Уникальный идентификатор пользователя, для которого ищутся рекомендации.
-     * @return Список фильмов, рекомендованных пользователю, или пустой список, если рекомендации построить невозможно.
-     * @throws EntityNotFoundException Генерируется, если пользователь с указанным идентификатором не найден.
+     * @param id идентификатор пользователя
+     * @return список рекомендованных фильмов с полной информацией
+     * @throws EntityNotFoundException если пользователь не найден
      */
     public List<Film> getRecommendations(long id) {
         User user = userStorage.getUserById(id);
@@ -242,7 +260,18 @@ public class UserDbService {
         Set<Long> recommendations = new HashSet<>(bestMatch.get().getValue());
         recommendations.removeAll(userLikes);
 
-        return filmStorage.getFilmsByIds(recommendations);
+        // Получаем фильмы и обогащаем их данными
+        List<Film> films = filmStorage.getFilmsByIds(recommendations);
+        Map<Long, Mpa> mpaMap = mpaDao.getMpaMapByFilms(recommendations);
+        Map<Long, Set<Genre>> genresMap = genreDao.getGenresMapByFilms(recommendations);
+
+        for (Film film : films) {
+            film.setMpa(mpaMap.get(film.getId()));
+            film.setGenres(new TreeSet<>(Comparator.comparing(Genre::getId))); // Сортируем по ID
+            film.getGenres().addAll(genresMap.getOrDefault(film.getId(), Collections.emptySet()));
+        }
+
+        return films;
     }
 
     /**

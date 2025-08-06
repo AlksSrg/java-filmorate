@@ -10,6 +10,17 @@ import ru.yandex.practicum.filmorate.service.DirectorDbService;
 
 import java.util.Collection;
 
+/**
+ * Контроллер для работы с режиссерами фильмов.
+ * Обеспечивает REST API для управления информацией о режиссерах.
+ * Поддерживает операции:
+ * - CRUD операции с режиссерами
+ * - Получение режиссера по идентификатору
+ * - Получение полного списка режиссеров
+ * <p>
+ * Все методы работают с сущностью {@link Director} и используют {@link DirectorDbService} для бизнес-логики.
+ */
+
 @RestController
 @RequestMapping("/directors")
 @RequiredArgsConstructor
@@ -61,7 +72,7 @@ public class DirectorController {
     }
 
     /**
-     * Удаление режиссёра по идентификатору.
+     * Удаляет режиссёра по идентификатору.
      *
      * @param id уникальный идентификатор фильма
      * @return пустой ответ с успешным статусом

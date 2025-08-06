@@ -1,8 +1,9 @@
 package ru.yandex.practicum.filmorate.utils;
 
+import ru.yandex.practicum.filmorate.model.Film;
+
 import java.util.Comparator;
 import java.util.Map;
-import ru.yandex.practicum.filmorate.model.Film;
 
 /**
  * Компаратор для сравнения фильмов по популярности (количеству лайков)

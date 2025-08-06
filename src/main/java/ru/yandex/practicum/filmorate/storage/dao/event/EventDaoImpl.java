@@ -11,6 +11,11 @@ import ru.yandex.practicum.filmorate.storage.mapper.EventMapper;
 
 import java.util.List;
 
+/**
+ * Реализация DAO для работы с событиями пользователей.
+ * Обеспечивает хранение и получение событий в базе данных.
+ */
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -20,6 +25,9 @@ public class EventDaoImpl implements EventDao {
 
     @Override
     public void addEvent(Long userId, EventType eventType, Operation operation, Long entityId) {
+        if (userId == null || eventType == null || operation == null || entityId == null) {
+            throw new IllegalArgumentException("Параметры события не могут быть null");
+        }
         String sql = "INSERT INTO events (timestamp, user_id, event_type, operation, entity_id) VALUES (?, ?, ?, ?, ?)";
         long timestamp = System.currentTimeMillis();
         jdbcTemplate.update(sql, timestamp, userId, eventType.toString(), operation.toString(), entityId);
@@ -29,25 +37,8 @@ public class EventDaoImpl implements EventDao {
 
     @Override
     public List<Event> getUserFeed(Long userId) {
-        String sql = "SELECT e.* FROM events e " +
-                "WHERE e.user_id = ? " +
-                "OR e.user_id IN (SELECT friend_id FROM friends WHERE user_id = ?) " +
-                "ORDER BY e.timestamp ASC";
-        List<Event> events = jdbcTemplate.query(sql, new EventMapper(), userId, userId);
-        log.info("Получена лента для пользователя {}: {} событий", userId, events.size());
-
-        // Для отладки выведем все события
-        if (events.isEmpty()) {
-            log.warn("Лента пустая для пользователя {}. Проверяем все события в БД:", userId);
-            List<Event> allEvents = getAllEvents();
-            log.info("Всего событий в БД: {}", allEvents.size());
-            for (Event e : allEvents) {
-                log.info("Событие: userId={}, eventType={}, operation={}, entityId={}",
-                        e.getUserId(), e.getEventType(), e.getOperation(), e.getEntityId());
-            }
-        }
-
-        return events;
+        String sql = "SELECT * FROM events WHERE user_id = ? ORDER BY event_id ASC";
+        return jdbcTemplate.query(sql, new EventMapper(), userId);
     }
 
     public List<Event> getAllEvents() {

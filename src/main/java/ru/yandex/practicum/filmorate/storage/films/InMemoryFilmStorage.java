@@ -10,8 +10,9 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * Реализация хранилища фильмов в памяти.
+ * Класс хранилища фильмов в оперативной памяти.
  */
+
 @Component("InMemoryFilmStorage")
 @Slf4j
 public class InMemoryFilmStorage implements FilmStorage {
@@ -87,7 +88,7 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     /**
-     * Возврат набора жанров для фильма (метод заглушка).
+     * Возвращает набора жанров для фильма (метод заглушка).
      *
      * @param filmId идентификатор фильма
      * @return временный объект Set<Genre>
@@ -118,6 +119,23 @@ public class InMemoryFilmStorage implements FilmStorage {
         return null;
     }
 
+    /**
+     * Возвращает список фильмов, отфильтрованных по заданным критериям.
+     * Поддерживает фильтрацию по жанру и году выпуска как отдельно, так и в комбинации.
+     *
+     * @param genreId идентификатор жанра для фильтрации (может быть null)
+     * @param year    год выпуска для фильтрации (может быть null)
+     * @return список фильмов, соответствующих критериям фильтрации.
+     * Если критерии не заданы, возвращает все фильмы.
+     * Если ни один фильм не соответствует критериям, возвращает пустой список.
+     *
+     * <p>Логика фильтрации:</p>
+     * <ul>
+     *   <li>При указании genreId: выбирает фильмы, содержащие данный жанр</li>
+     *   <li>При указании year: выбирает фильмы, выпущенные в указанном году</li>
+     *   <li>При указании обоих параметров: применяет оба фильтра последовательно</li>
+     * </ul>
+     */
     @Override
     public Collection<Film> getFilteredFilms(Integer genreId, Integer year) {
         Collection<Film> result = films.values();

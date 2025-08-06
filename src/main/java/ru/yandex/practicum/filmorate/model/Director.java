@@ -6,6 +6,12 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Модель режиссера фильма.
+ * Содержит информацию о режиссере, включая идентификатор и имя.
+ * Используется для хранения и передачи данных о режиссерах в системе.
+ */
+
 @Data
 @NoArgsConstructor
 @Builder
@@ -18,7 +24,7 @@ public class Director {
     private Long id;
 
     /**
-     * Имя режиссера обязательно для заполнения.
+     * Имя режиссера. Обязательное поле, не может быть пустым или содержать только пробелы.
      */
     @NotBlank
     private String name;

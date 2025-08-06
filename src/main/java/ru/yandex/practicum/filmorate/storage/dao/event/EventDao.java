@@ -7,25 +7,26 @@ import ru.yandex.practicum.filmorate.model.constants.Operation;
 import java.util.List;
 
 /**
- * Интерфейс для работы с событиями пользователей
- * */
+ * Интерфейс для работы с событиями пользователей.
+ */
+
 public interface EventDao {
 
     /**
-     * Добавляет новое событие в ленту.
+     * Добавляет новое событие в систему.
      *
-     * @param userId идентификатор пользователя
+     * @param userId    идентификатор пользователя
      * @param eventType тип события
      * @param operation тип операции
-     * @param entityId идентификатор сущности, с которой происходит событие
-     * */
+     * @param entityId  идентификатор сущности, связанной с событием
+     */
     void addEvent(Long userId, EventType eventType, Operation operation, Long entityId);
 
     /**
-     * Добавляет новое событие в ленту.
+     * Возвращает список событий пользователя.
      *
      * @param userId идентификатор пользователя
      * @return список событий
-     * */
+     */
     List<Event> getUserFeed(Long userId);
 }

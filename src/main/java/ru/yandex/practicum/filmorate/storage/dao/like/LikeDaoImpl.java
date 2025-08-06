@@ -1,15 +1,21 @@
 package ru.yandex.practicum.filmorate.storage.dao.like;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+/**
+ * Реализация DAO для работы с лайками пользователей.
+ * Обеспечивает хранение и получение лайков в базе данных.
+ */
 
 @AllArgsConstructor
 @Component
@@ -22,7 +28,7 @@ public class LikeDaoImpl implements LikeDao {
     public void addLike(Long userId, Long filmId) {
         try {
             jdbcTemplate.update("INSERT INTO likes (user_id, film_id) VALUES (?,?)", userId,
-                filmId);
+                    filmId);
             log.info("Добавлен лайк пользователя {} для фильма {}", userId, filmId);
         } catch (EntityNotFoundException e) {
             log.error("Ошибка при добавлении лайка пользователю {}: {}", userId, e.getMessage());
@@ -33,7 +39,7 @@ public class LikeDaoImpl implements LikeDao {
     public void deleteLike(Long userId, Long filmId) {
         try {
             jdbcTemplate.update("DELETE FROM likes WHERE user_id = ? AND film_id = ?", userId,
-                filmId);
+                    filmId);
             log.info("Удален лайк пользователя {} для фильма {}", userId, filmId);
         } catch (EntityNotFoundException e) {
             log.error("Ошибка при удалении лайка пользователя {}: {}", userId, e.getMessage());
@@ -43,7 +49,7 @@ public class LikeDaoImpl implements LikeDao {
     @Override
     public int checkLikes(Long filmId) {
         Integer count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM likes WHERE film_id=?",
-            Integer.class, filmId);
+                Integer.class, filmId);
         return count != null ? count : 0;
     }
 
@@ -65,9 +71,9 @@ public class LikeDaoImpl implements LikeDao {
     public Set<Long> getLikedFilms(Long userId) {
         String sql = "SELECT film_id FROM likes WHERE user_id = ?";
         return new HashSet<>(jdbcTemplate.query(
-            sql,
-            (rs, rowNum) -> rs.getLong("film_id"),
-            userId
+                sql,
+                (rs, rowNum) -> rs.getLong("film_id"),
+                userId
         ));
     }
 

@@ -11,6 +11,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+
+/**
+ * Реализация DAO для работы с отзывами.
+ * Обеспечивает доступ к данным об отзывах о фильмах.
+ */
+
 @Repository
 public class ReviewDaoImpl implements ReviewDao {
 

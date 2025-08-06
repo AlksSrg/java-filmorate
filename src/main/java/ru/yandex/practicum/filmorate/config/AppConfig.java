@@ -1,14 +1,17 @@
 package ru.yandex.practicum.filmorate.config;
 
-import java.util.Map;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import ru.yandex.practicum.filmorate.storage.dao.like.LikeDao;
 import ru.yandex.practicum.filmorate.utils.FilmPopularityComparator;
 
+import java.util.Map;
+
 /**
- * Конфигурация для работы с FilmPopularityComparator
+ * Конфигурационный класс Spring для работы с компаратором популярности фильмов.
+ * Создает и настраивает бины, необходимые для работы приложения.
  */
+
 @Configuration
 public class AppConfig {
 

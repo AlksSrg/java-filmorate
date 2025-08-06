@@ -21,7 +21,7 @@ public class SearchParameterParser {
             String trimmedParam = param.trim();
             if (!"title".equals(trimmedParam) && !"director".equals(trimmedParam)) {
                 throw new IllegalArgumentException("Недопустимый параметр поиска: " + trimmedParam +
-                                                   ". Допустимые значения: 'title', 'director'.");
+                        ". Допустимые значения: 'title', 'director'.");
             }
         }
         return params;

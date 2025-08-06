@@ -9,6 +9,7 @@ import java.util.Set;
 /**
  * Интерфейс для работы с рейтингами MPA.
  */
+
 public interface MpaDao {
 
     /**

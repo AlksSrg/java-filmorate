@@ -1,15 +1,5 @@
 package ru.yandex.practicum.filmorate.service;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -17,11 +7,11 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.constants.EventType;
 import ru.yandex.practicum.filmorate.model.constants.Operation;
 import ru.yandex.practicum.filmorate.storage.dao.event.EventDao;
-import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.storage.dao.genre.GenreDao;
 import ru.yandex.practicum.filmorate.storage.dao.like.LikeDao;
 import ru.yandex.practicum.filmorate.storage.dao.mpa.MpaDao;
@@ -33,9 +23,28 @@ import ru.yandex.practicum.filmorate.utils.FilmSearchMatcher;
 import ru.yandex.practicum.filmorate.utils.SearchParameterParser;
 import ru.yandex.practicum.filmorate.utils.ValidationUtils;
 
+import java.time.LocalDate;
+import java.util.*;
+import java.util.stream.Collectors;
+
 /**
- * Сервис для обработки бизнес-логики, связанной с фильмами.
+ * Сервис для работы с фильмами.
+ * Реализует комплексную бизнес-логику управления фильмами, включая:
+ * <ul>
+ *   <li>CRUD операции с фильмами</li>
+ *   <li>Управление лайками и рейтингами</li>
+ *   <li>Поиск и рекомендации фильмов</li>
+ *   <li>Работу с жанрами и режиссерами</li>
+ * </ul>
+ *
+ * <p>Использует:</p>
+ * <ul>
+ *   <li>{@link FilmStorage} для хранения фильмов</li>
+ *   <li>{@link GenreDao}, {@link MpaDao}, {@link DirectorStorage} для связанных данных</li>
+ *   <li>{@link LikeDao} для работы с лайками</li>
+ * </ul>
  */
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -96,6 +105,7 @@ public class FilmDbService {
      * @param userId уникальный идентификатор пользователя
      */
     public void deleteLikeFilm(Long filmId, Long userId) {
+        checkExistence(userId, filmId);
         likeDao.deleteLike(userId, filmId);
         eventDao.addEvent(userId, EventType.LIKE, Operation.REMOVE, filmId);
         log.info("У фильма с id={} удален лайк от пользователя id={}", filmId, userId);
@@ -116,14 +126,14 @@ public class FilmDbService {
 
         List<Film> films = new ArrayList<>(filmStorage.getFilteredFilms(genreId, year));
         return films.stream()
-            .sorted(Comparator.comparingInt((Film film) -> {
-                    int likes = likeDao.checkLikes(film.getId());
-                    return likes < 0 ? 0 : likes;
-                }).reversed()
-                .thenComparing(Film::getReleaseDate, Comparator.reverseOrder()))
-            .limit(topNumber)
-            .peek(this::enrichFilmWithDetails)
-            .collect(Collectors.toList());
+                .sorted(Comparator.comparingInt((Film film) -> {
+                            int likes = likeDao.checkLikes(film.getId());
+                            return likes < 0 ? 0 : likes;
+                        }).reversed()
+                        .thenComparing(Film::getReleaseDate, Comparator.reverseOrder()))
+                .limit(topNumber)
+                .peek(this::enrichFilmWithDetails)
+                .collect(Collectors.toList());
     }
 
     /**
@@ -133,18 +143,37 @@ public class FilmDbService {
      * @return созданный фильм
      */
     public Film addFilm(Film film) {
-        // Единственная проверка валидности фильма
+        // Проверка валидности фильма
         ValidationUtils.validateFilm(film, mpaDao, genreDao);
 
+        // Добавляем фильм в хранилище
         Film addedFilm = filmStorage.addFilm(film);
 
+        // Обрабатываем жанры
         if (film.getGenres() != null && !film.getGenres().isEmpty()) {
-            genreDao.updateGenres(addedFilm.getId(), film.getGenres());
+            // Сортируем жанры по ID перед сохранением
+            Set<Genre> sortedGenres = new TreeSet<>(Comparator.comparing(Genre::getId));
+            sortedGenres.addAll(film.getGenres());
+
+            // Обновляем жанры в БД
+            genreDao.updateGenres(addedFilm.getId(), sortedGenres);
+
+            // Устанавливаем отсортированные жанры в возвращаемый объект
+            addedFilm.setGenres(sortedGenres);
+        } else {
+            addedFilm.setGenres(Collections.emptySet());
         }
 
-        if (film.getDirectors() != null) {
+        // Обрабатываем режиссеров
+        if (film.getDirectors() != null && !film.getDirectors().isEmpty()) {
             directorStorage.addDirectors(film.getId(), film.getDirectors());
+            addedFilm.setDirectors(new HashSet<>(film.getDirectors()));
+        } else {
+            addedFilm.setDirectors(Collections.emptySet());
         }
+
+        // Получаем полные данные MPA
+        addedFilm.setMpa(mpaDao.getMpaById(film.getMpa().getId()));
 
         return addedFilm;
     }
@@ -156,22 +185,44 @@ public class FilmDbService {
      * @return обновленный фильм
      */
     public Film updateFilm(Film film) {
+        // Проверяем существование фильма
         Film currentFilm = filmStorage.getFilmById(film.getId());
         if (currentFilm == null) {
             throw new EntityNotFoundException("Фильм с указанным ID не найден");
         }
 
-        LocalDate releaseDate = film.getReleaseDate();
-        if (releaseDate == null || releaseDate.isBefore(LocalDate.of(1895, 12, 28))) {
+        // Проверяем и корректируем дату релиза
+        if (film.getReleaseDate() == null || film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
             film.setReleaseDate(currentFilm.getReleaseDate());
         }
 
+        // Обновляем основную информацию о фильме
         Film updatedFilm = filmStorage.updateFilm(film);
 
-        genreDao.updateGenres(film.getId(), film.getGenres());
-        directorStorage.updateDirectorsForFilm(film.getId(), film.getDirectors());
+        // Обрабатываем жанры
+        if (film.getGenres() != null) {
+            // Сортируем жанры по ID перед сохранением
+            Set<Genre> sortedGenres = new TreeSet<>(Comparator.comparing(Genre::getId));
+            sortedGenres.addAll(film.getGenres());
 
-        enrichFilmWithDetails(updatedFilm);
+            genreDao.updateGenres(film.getId(), sortedGenres);
+            updatedFilm.setGenres(sortedGenres);
+        } else {
+            genreDao.updateGenres(film.getId(), Collections.emptySet());
+            updatedFilm.setGenres(Collections.emptySet());
+        }
+
+        // Обрабатываем режиссеров
+        if (film.getDirectors() != null) {
+            directorStorage.updateDirectorsForFilm(film.getId(), film.getDirectors());
+            updatedFilm.setDirectors(new HashSet<>(film.getDirectors()));
+        } else {
+            directorStorage.updateDirectorsForFilm(film.getId(), Collections.emptySet());
+            updatedFilm.setDirectors(Collections.emptySet());
+        }
+
+        // Обогащаем данные MPA
+        updatedFilm.setMpa(mpaDao.getMpaById(film.getMpa().getId()));
 
         return updatedFilm;
     }
@@ -208,8 +259,8 @@ public class FilmDbService {
      */
     public Collection<Film> getAllFilms() {
         return filmStorage.getFilms().stream()
-            .peek(this::enrichFilmWithDetails)
-            .collect(Collectors.toList());
+                .peek(this::enrichFilmWithDetails)
+                .collect(Collectors.toList());
     }
 
     /**
@@ -244,7 +295,7 @@ public class FilmDbService {
     }
 
     /**
-     * Удаление фильма по id.
+     * Удаляет фильм по id.
      *
      * @param id идентификатор фильма
      */
@@ -253,7 +304,7 @@ public class FilmDbService {
     }
 
     /**
-     * Метод предоставляет список фильмов которые понравились пользователю.
+     * Возвращает список фильмов которые понравились пользователю.
      *
      * @param id id пользователя для которого выгружаются понравившиеся фильмы.
      * @return возвращает список понравившихся фильмов.
@@ -269,7 +320,7 @@ public class FilmDbService {
     }
 
     /**
-     * Сортировка фильмов заданного режиссёру по лайкам или годам выпуска.
+     * Сортирует фильмы заданного режиссёру по лайкам или годам выпуска.
      *
      * @param directorId id режиссёра чьи фильмы будут сортироваться.
      * @param sort       параметр сортировки year или likes
@@ -278,11 +329,11 @@ public class FilmDbService {
     public Collection<Film> getFilmsByDirector(Long directorId, String sort) {
         if (directorStorage.getDirectorById(directorId) == null) {
             throw new EntityNotFoundException(
-                String.format("Режиссера с таким id - %s не существует.", directorId));
+                    String.format("Режиссера с таким id - %s не существует.", directorId));
         }
         if (!sort.equals("year") && !sort.equals("likes")) {
             throw new EntityNotFoundException(
-                String.format("Нет сортировки по указанному параметру %s", sort));
+                    String.format("Нет сортировки по указанному параметру %s", sort));
         }
 
         Collection<Film> films = filmStorage.getFilmsByDirector(directorId, sort);
@@ -324,8 +375,8 @@ public class FilmDbService {
 
         // Находим пересечение
         Set<Long> commonFilmIds = userLikedFilms.stream()
-            .filter(friendLikedFilms::contains)
-            .collect(Collectors.toSet());
+                .filter(friendLikedFilms::contains)
+                .collect(Collectors.toSet());
 
         if (commonFilmIds.isEmpty()) {
             return Collections.emptyList();
@@ -336,27 +387,30 @@ public class FilmDbService {
 
         // Получаем количество лайков для всех фильмов
         Map<Long, Integer> likesCountMap = commonFilmIds.stream()
-            .collect(Collectors.toMap(
-                filmId -> filmId,
-                likeDao::getLikesCount
-            ));
+                .collect(Collectors.toMap(
+                        filmId -> filmId,
+                        likeDao::getLikesCount
+                ));
 
         return films.stream()
-            .peek(this::enrichFilmWithDetails)
-            .sorted(Comparator.comparingInt((Film film) ->
-                    likesCountMap.getOrDefault(film.getId(), 0))
-                .reversed())
-            .collect(Collectors.toList());
+                .peek(this::enrichFilmWithDetails)
+                .sorted(Comparator.comparingInt((Film film) ->
+                                likesCountMap.getOrDefault(film.getId(), 0))
+                        .reversed())
+                .collect(Collectors.toList());
     }
 
     /**
-     * Реализует поиск фильмов по названию и/или режиссёру с сортировкой по популярности
+     * Осуществляет поиск фильмов по названию и/или режиссеру.
+     * Поддерживает следующие параметры поиска:
+     * - "title" - поиск по названию фильма (без учета регистра)
+     * - "director" - поиск по имени режиссера (без учета регистра)
+     * - "title, director" - поиск одновременно по названию и режиссеру (по умолчанию)
      *
-     * @param query текст для поиска (без учета регистра)
-     * @param by    параметры поиска: "director" (по режиссёру), "title" (по названию), или оба
-     *              значения через запятую (по умолчанию: "title,director")
-     * @return список фильмов, соответствующих критериям поиска, отсортированных по популярности
-     * @throws IllegalArgumentException если параметр 'by' содержит недопустимые значения
+     * @param query строка поиска (минимум 1 символ)
+     * @param by    параметры поиска (должны содержать "title", "director" или оба значения)
+     * @return список фильмов, отсортированных по популярности (количеству лайков)
+     * @throws IllegalArgumentException если параметры поиска некорректны
      */
     public List<Film> searchFilms(String query, String by) {
         String[] searchParams = SearchParameterParser.parseSearchParameters(by);
@@ -369,8 +423,8 @@ public class FilmDbService {
         Comparator<Film> comparator = new FilmPopularityComparator(likesCountMap);
 
         return allFilms.stream()
-            .filter(film -> FilmSearchMatcher.matches(film, lowerCaseQuery, searchParams))
-            .sorted(comparator)
-            .collect(Collectors.toList());
+                .filter(film -> FilmSearchMatcher.matches(film, lowerCaseQuery, searchParams))
+                .sorted(comparator)
+                .collect(Collectors.toList());
     }
 }

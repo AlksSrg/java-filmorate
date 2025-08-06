@@ -10,6 +10,11 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.util.Collections;
 import java.util.Map;
 
+/**
+ * Глобальный обработчик исключений для REST контроллеров.
+ * Обеспечивает единообразную обработку ошибок и формирование ответов.
+ */
+
 @RestControllerAdvice
 public class ErrorHandler {
 

@@ -4,11 +4,19 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
-import java.time.LocalDate;
-import java.util.Set;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Length;
+
+import java.time.LocalDate;
+import java.util.Set;
+
+/**
+ * Модель фильма.
+ * Основная сущность системы, содержащая информацию о фильме:
+ * название, описание, дата выпуска, продолжительность и связанные данные.
+ * Поддерживает валидацию основных полей.
+ */
 
 @Data
 @NoArgsConstructor
@@ -27,7 +35,7 @@ public class Film {
     private String name;
 
     /**
-     * Описание фильма, обязательное для заполнения, максимум 200 символов.
+     * Описание фильма. Обязательное поле, максимум 200 символов.
      */
     @NotBlank
     @Size(max = 200, message = "Описание фильма не должно превышать 200 символов")
@@ -39,18 +47,18 @@ public class Film {
     private LocalDate releaseDate;
 
     /**
-     * Длительность фильма в минутах, значение должно быть неотрицательным.
+     * Продолжительность фильма в минутах. Должна быть неотрицательной.
      */
     @PositiveOrZero(message = "Продолжительность фильма должна быть неотрицательным числом")
     private Integer duration;
 
     /**
-     * Набор жанров, к которым относится фильм.
+     * Набор жанров фильма.
      */
     private Set<Genre> genres;
 
     /**
-     * Рейтинг MPA фильма, обязательное поле.
+     * Возрастной рейтинг MPA фильма. Обязательное поле.
      */
     @NotNull
     private Mpa mpa;
@@ -61,12 +69,13 @@ public class Film {
     private Set<Director> directors;
 
     /**
-     * Конструктор для инициализации объекта фильма основными полями.
+     * Конструктор для создания объекта фильма с основными параметрами.
+     * Используется при создании нового фильма без дополнительных данных (жанры, режиссеры).
      *
-     * @param name        название фильма
-     * @param description описание фильма
-     * @param releaseDate дата выхода фильма
-     * @param duration    продолжительность фильма
+     * @param name        название фильма (обязательное поле)
+     * @param description описание фильма (обязательное поле, не более 200 символов)
+     * @param releaseDate дата выхода фильма (не может быть раньше 28 декабря 1895 года)
+     * @param duration    продолжительность фильма в минутах (положительное число)
      */
     public Film(String name, String description, LocalDate releaseDate, int duration) {
         this.name = name;

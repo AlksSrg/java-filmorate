@@ -14,6 +14,12 @@ import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 import java.sql.Date;
 import java.util.Collection;
 
+/**
+ * Реализация DAO для работы с пользователями.
+ * Обеспечивает доступ к данным о пользователях.
+ */
+
+
 @AllArgsConstructor
 @Component
 public class UserDaoImpl implements UserStorage {

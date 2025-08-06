@@ -20,6 +20,11 @@ import java.sql.Statement;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * Реализация хранилища пользователей в базе данных.
+ * Является основной реализацией ({@link Primary}) интерфейса {@link FilmStorage}.
+ */
+
 @Slf4j
 @Component("FilmDbStorage")
 @RequiredArgsConstructor

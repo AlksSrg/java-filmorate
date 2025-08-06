@@ -14,6 +14,11 @@ import java.sql.PreparedStatement;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * Реализация хранилища режиссеров в базе данных.
+ * Является основной реализацией ({@link Primary}) интерфейса {@link DirectorStorage}.
+ */
+
 @Repository
 @RequiredArgsConstructor
 @Primary

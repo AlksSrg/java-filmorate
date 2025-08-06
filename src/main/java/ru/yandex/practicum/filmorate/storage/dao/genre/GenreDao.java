@@ -8,6 +8,7 @@ import java.util.Set;
 /**
  * Интерфейс для работы с жанрами фильмов.
  */
+
 public interface GenreDao {
 
     /**

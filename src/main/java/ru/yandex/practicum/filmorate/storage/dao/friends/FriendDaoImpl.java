@@ -8,6 +8,11 @@ import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
 
 import java.util.List;
 
+/**
+ * Реализация DAO для работы с друзьями пользователей.
+ * Обеспечивает хранение и получение списка друзей в базе данных.
+ */
+
 @AllArgsConstructor
 @Component
 public class FriendDaoImpl implements FriendDao {
@@ -34,6 +39,9 @@ public class FriendDaoImpl implements FriendDao {
 
     @Override
     public void deleteFriends(Long userId, Long idFriend) {
+        if (userId == null || idFriend == null) {
+            throw new IllegalArgumentException("ID пользователей не могут быть null");
+        }
         if (!existsUser(userId)) {
             throw new EntityNotFoundException("Пользователь с id " + userId + " не найден");
         }

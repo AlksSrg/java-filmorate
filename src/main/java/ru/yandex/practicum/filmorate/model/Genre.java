@@ -1,24 +1,28 @@
 package ru.yandex.practicum.filmorate.model;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * Класс-модель для создания объекта жанра со свойствами <b>id<b/>, <b>name<b/>.
+ * Модель жанра фильма.
+ * Содержит идентификатор и название жанра.
+ * Используется для категоризации фильмов.
  */
+
 @Data
 @NoArgsConstructor
 public class Genre {
 
     /**
-     * Уникальный идентификатор жанра, обязательное поле.
+     * Уникальный идентификатор жанра. Обязательное поле.
      */
-    @NotBlank(message = "ID Жанра должен быть обязательно")
+    @NotNull(message = "ID жанра обязательно должен быть указан")
     private Integer id;
 
     /**
-     * Название жанра, обязательное поле.
+     * Название жанра. Обязательное поле, не может быть пустым.
      */
     @NotBlank(message = "Название жанра обязательно")
     private String name;

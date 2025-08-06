@@ -1,13 +1,15 @@
 package ru.yandex.practicum.filmorate.storage.mapper;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import org.springframework.jdbc.core.RowMapper;
 import ru.yandex.practicum.filmorate.model.Review;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 /**
  * Класс маппера для преобразования строк базы данных в объекты типа {@link Review}.
  */
+
 public class FilmReviewMapper implements RowMapper<Review> {
 
     /**

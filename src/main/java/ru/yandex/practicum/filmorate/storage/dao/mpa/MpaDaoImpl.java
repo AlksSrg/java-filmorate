@@ -14,6 +14,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+
+/**
+ * Реализация DAO для работы с рейтингами MPA.
+ * Обеспечивает доступ к данным о возрастных рейтингах фильмов.
+ */
+
 @AllArgsConstructor
 @Component
 public class MpaDaoImpl implements MpaDao {

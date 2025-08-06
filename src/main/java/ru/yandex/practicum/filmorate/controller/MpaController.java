@@ -13,8 +13,15 @@ import ru.yandex.practicum.filmorate.service.MpaDbService;
 import java.util.Collection;
 
 /**
- * Класс-контроллер для получения данных о рейтинге
+ * Контроллер для работы с возрастными рейтингами (MPA).
+ * Обеспечивает REST API для доступа к информации о рейтингах.
+ * Поддерживает операции:
+ * - Получение рейтинга по идентификатору
+ * - Получение полного списка рейтингов
+ * <p>
+ * Все методы работают с сущностью {@link Mpa} и используют {@link MpaDbService} для бизнес-логики.
  */
+
 @RestController
 @RequestMapping("/mpa")
 @RequiredArgsConstructor
@@ -24,7 +31,7 @@ public class MpaController {
     private final MpaDbService mpaService;
 
     /**
-     * Метод возвращает рейтинг MPA по уникальному идентификатору.
+     * Возвращает рейтинг MPA по уникальному идентификатору.
      *
      * @param id идентификатор рейтинга
      * @return объект рейтинга MPA
@@ -36,9 +43,9 @@ public class MpaController {
     }
 
     /**
-     * Метод возвращает полный список всех рейтингов MPAA.
+     * Возвращает полный список всех рейтингов MPA.
      *
-     * @return коллекция объектов рейтингов MPAA
+     * @return коллекция объектов рейтингов MPA
      */
     @GetMapping
     public Collection<Mpa> getMpaList() {

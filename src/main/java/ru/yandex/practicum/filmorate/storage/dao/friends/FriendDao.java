@@ -5,6 +5,7 @@ import java.util.List;
 /**
  * Интерфейс для работы с логикой дружбы между пользователями.
  */
+
 public interface FriendDao {
 
     /**

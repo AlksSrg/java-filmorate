@@ -7,6 +7,7 @@ import ru.yandex.practicum.filmorate.model.Review;
 /**
  * Маппер для преобразования между Review и ReviewDto.
  */
+
 @Component
 public class ReviewMapper {
 

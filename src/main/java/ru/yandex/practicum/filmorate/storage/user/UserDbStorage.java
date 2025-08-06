@@ -14,6 +14,11 @@ import ru.yandex.practicum.filmorate.storage.mapper.UserMapper;
 import java.sql.Date;
 import java.util.Collection;
 
+/**
+ * Реализация хранилища пользователей в базе данных.
+ * Является основной реализацией ({@link Primary}) интерфейса {@link UserStorage}.
+ */
+
 @Slf4j
 @Component("UserDbStorage")
 @RequiredArgsConstructor
@@ -46,7 +51,6 @@ public class UserDbStorage implements UserStorage {
     public User updateUser(User user) {
         Long userId = user.getId();
 
-        // Проверяем, существует ли пользователь с данным ID
         int rowsAffected = jdbcTemplate.update(
                 "UPDATE users SET email = ?, login = ?, name = ?, birthday = ? WHERE user_id = ?",
                 user.getEmail(), user.getLogin(), user.getName(), Date.valueOf(user.getBirthday()), userId
@@ -58,7 +62,7 @@ public class UserDbStorage implements UserStorage {
         }
 
         log.debug("Пользователь обновлен");
-        return user;
+        return getUserById(userId);
     }
 
     @Override

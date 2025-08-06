@@ -6,20 +6,44 @@ import lombok.NoArgsConstructor;
 import ru.yandex.practicum.filmorate.model.constants.EventType;
 import ru.yandex.practicum.filmorate.model.constants.Operation;
 
+/**
+ * Модель события в системе.
+ * Представляет действия пользователей (лайки, отзывы, дружба) для формирования ленты событий.
+ * Содержит информацию о типе события, пользователе, времени и связанной сущности.
+ */
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class Event {
 
-    private Long eventId; // Уникальный идентификатор события.
+    /**
+     * Уникальный идентификатор события.
+     */
+    private Long eventId;
 
-    private Long timestamp; // Временная метка события в миллисекундах.
+    /**
+     * Временная метка события в миллисекундах.
+     */
+    private Long timestamp;
 
-    private Long userId; // Идентификатор пользователя, совершившего действие.
+    /**
+     * Идентификатор пользователя, совершившего действие.
+     */
+    private Long userId;
 
-    private EventType eventType; // Тип события (LIKE, REVIEW, FRIEND).
+    /**
+     * Тип события (LIKE, REVIEW, FRIEND).
+     */
+    private EventType eventType;
 
-    private Operation operation; // Тип операции (ADD, REMOVE, UPDATE).
+    /**
+     * Тип операции (ADD, REMOVE, UPDATE).
+     */
+    private Operation operation;
 
-    private Long entityId; // Идентификатор сущности, с которой произошло событие.
+    /**
+     * Идентификатор сущности, к которой относится событие.
+     */
+    private Long entityId;
 }
