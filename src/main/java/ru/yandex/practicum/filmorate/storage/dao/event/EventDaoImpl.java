@@ -5,9 +5,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Event;
-import ru.yandex.practicum.filmorate.model.constants.EventType;
-import ru.yandex.practicum.filmorate.model.constants.Operation;
 import ru.yandex.practicum.filmorate.storage.mapper.EventMapper;
+import ru.yandex.practicum.filmorate.utils.constants.EventType;
+import ru.yandex.practicum.filmorate.utils.constants.Operation;
 
 import java.util.List;
 

@@ -3,11 +3,11 @@ package ru.yandex.practicum.filmorate.controller;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.dto.ReviewDto;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
-import ru.yandex.practicum.filmorate.mapper.ReviewMapper;
 import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.service.ReviewService;
+import ru.yandex.practicum.filmorate.storage.dto.ReviewDto;
+import ru.yandex.practicum.filmorate.storage.mapper.ReviewMapper;
 
 import java.util.List;
 
@@ -20,9 +20,8 @@ import java.util.List;
  * - Получение отзывов по различным критериям
  * <p>
  * Все методы работают с сущностью {@link Review} и используют {@link ReviewService} для бизнес-логики.
- * Для преобразования DTO используется {@link ReviewMapper}.
+ * Для преобразования DTO используется статический {@link ReviewMapper}.
  */
-
 @RestController
 @RequestMapping("/reviews")
 public class ReviewController {
@@ -33,20 +32,13 @@ public class ReviewController {
     private final ReviewService reviewService;
 
     /**
-     * Маппер для преобразования DTO объектов в модели и обратно.
-     */
-    private final ReviewMapper reviewMapper;
-
-    /**
-     * Конструктор контроллера с внедрением зависимостей сервиса и маппера.
+     * Конструктор контроллера с внедрением зависимости сервиса.
      *
      * @param reviewService сервис отзывов
-     * @param reviewMapper  маппер отзывов
      */
     @Autowired
-    public ReviewController(ReviewService reviewService, ReviewMapper reviewMapper) {
+    public ReviewController(ReviewService reviewService) {
         this.reviewService = reviewService;
-        this.reviewMapper = reviewMapper;
     }
 
     /**
@@ -57,7 +49,7 @@ public class ReviewController {
      */
     @PostMapping
     public Review create(@Valid @RequestBody ReviewDto reviewDto) {
-        return reviewService.create(reviewMapper.toReview(reviewDto));
+        return reviewService.create(ReviewMapper.toReview(reviewDto));
     }
 
     /**
@@ -75,11 +67,10 @@ public class ReviewController {
         }
 
         Review existingReview = reviewService.getById(reviewDto.getReviewId());
-
         reviewDto.setUserId(existingReview.getUserId());
         reviewDto.setFilmId(existingReview.getFilmId());
 
-        return reviewService.update(reviewMapper.toReview(reviewDto));
+        return reviewService.update(ReviewMapper.toReview(reviewDto));
     }
 
     /**

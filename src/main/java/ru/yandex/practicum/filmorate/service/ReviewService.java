@@ -5,12 +5,12 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Review;
-import ru.yandex.practicum.filmorate.model.constants.EventType;
-import ru.yandex.practicum.filmorate.model.constants.Operation;
 import ru.yandex.practicum.filmorate.storage.dao.event.EventDao;
 import ru.yandex.practicum.filmorate.storage.dao.review.ReviewDao;
 import ru.yandex.practicum.filmorate.storage.films.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
+import ru.yandex.practicum.filmorate.utils.constants.EventType;
+import ru.yandex.practicum.filmorate.utils.constants.Operation;
 
 import java.util.List;
 

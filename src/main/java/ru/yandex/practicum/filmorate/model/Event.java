@@ -1,10 +1,11 @@
 package ru.yandex.practicum.filmorate.model;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import ru.yandex.practicum.filmorate.model.constants.EventType;
-import ru.yandex.practicum.filmorate.model.constants.Operation;
+import ru.yandex.practicum.filmorate.utils.constants.EventType;
+import ru.yandex.practicum.filmorate.utils.constants.Operation;
 
 /**
  * Модель события в системе.
@@ -13,6 +14,7 @@ import ru.yandex.practicum.filmorate.model.constants.Operation;
  */
 
 @Data
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class Event {
@@ -33,12 +35,12 @@ public class Event {
     private Long userId;
 
     /**
-     * Тип события (LIKE, REVIEW, FRIEND).
+     * Тип события.
      */
     private EventType eventType;
 
     /**
-     * Тип операции (ADD, REMOVE, UPDATE).
+     * Тип операции.
      */
     private Operation operation;
 

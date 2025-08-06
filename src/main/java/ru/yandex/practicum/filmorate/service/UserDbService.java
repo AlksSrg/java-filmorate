@@ -6,8 +6,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.model.*;
-import ru.yandex.practicum.filmorate.model.constants.EventType;
-import ru.yandex.practicum.filmorate.model.constants.Operation;
 import ru.yandex.practicum.filmorate.storage.dao.event.EventDao;
 import ru.yandex.practicum.filmorate.storage.dao.friends.FriendDao;
 import ru.yandex.practicum.filmorate.storage.dao.genre.GenreDao;
@@ -16,6 +14,8 @@ import ru.yandex.practicum.filmorate.storage.dao.mpa.MpaDao;
 import ru.yandex.practicum.filmorate.storage.films.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 import ru.yandex.practicum.filmorate.utils.ValidationUtils;
+import ru.yandex.practicum.filmorate.utils.constants.EventType;
+import ru.yandex.practicum.filmorate.utils.constants.Operation;
 
 import java.util.*;
 import java.util.stream.Collectors;

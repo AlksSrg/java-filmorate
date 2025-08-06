@@ -1,17 +1,14 @@
-package ru.yandex.practicum.filmorate.mapper;
+package ru.yandex.practicum.filmorate.storage.mapper;
 
-import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.dto.ReviewDto;
 import ru.yandex.practicum.filmorate.model.Review;
+import ru.yandex.practicum.filmorate.storage.dto.ReviewDto;
 
 /**
  * Маппер для преобразования между Review и ReviewDto.
  */
 
-@Component
 public class ReviewMapper {
-
-    public Review toReview(ReviewDto reviewDto) {
+    public static Review toReview(ReviewDto reviewDto) {
         Review review = new Review();
         review.setReviewId(reviewDto.getReviewId());
         review.setContent(reviewDto.getContent());
@@ -21,7 +18,7 @@ public class ReviewMapper {
         return review;
     }
 
-    public ReviewDto toReviewDto(Review review) {
+    public static ReviewDto toReviewDto(Review review) {
         ReviewDto reviewDto = new ReviewDto();
         reviewDto.setReviewId(review.getReviewId());
         reviewDto.setContent(review.getContent());

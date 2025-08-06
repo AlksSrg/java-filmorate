@@ -1,12 +1,12 @@
 package ru.yandex.practicum.filmorate.utils;
 
-import lombok.NoArgsConstructor;
-
 /**
- * Утилита для парсинга параметров поиска
+ * Утилита для парсинга параметров поиска.
  */
-@NoArgsConstructor
-public class SearchParameterParser {
+public final class SearchParameterParser {
+
+    private SearchParameterParser() {
+    }
 
     /**
      * Парсит параметры поиска

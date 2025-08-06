@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.model.constants;
+package ru.yandex.practicum.filmorate.utils.constants;
 
 /**
  * Типы операций над событиями (REMOVE - удаление, ADD - добавление, UPDATE обновление)

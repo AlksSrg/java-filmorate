@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.model.constants;
+package ru.yandex.practicum.filmorate.utils.constants;
 
 /**
  * Типы событий в ленте активности (LIKE - лайки, REVIEW - отзывы, FRIEND - друзья)

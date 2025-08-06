@@ -25,6 +25,11 @@ import java.util.stream.Collectors;
 public class MpaDaoImpl implements MpaDao {
 
     private final JdbcTemplate jdbcTemplate;
+    private static final String GET_MPA_BY_FILMS_SQL = """
+            SELECT f.film_id, m.mpa_id, m.mpa_name
+            FROM film f
+            JOIN mpa m ON f.mpa_id = m.mpa_id
+            WHERE f.film_id IN (%s)""";
 
     @Override
     public Mpa getMpaById(Integer id) {
@@ -42,18 +47,19 @@ public class MpaDaoImpl implements MpaDao {
 
     @Override
     public Map<Long, Mpa> getMpaMapByFilms(Set<Long> filmIds) {
-        String sql = """
-                SELECT f.film_id, m.mpa_id, m.mpa_name
-                FROM film f
-                JOIN mpa m ON f.mpa_id = m.mpa_id
-                WHERE f.film_id IN (%s)""".formatted(filmIds.stream().map(id -> "?")
-                .collect(Collectors.joining(", ")));
+        String inClause = filmIds.stream()
+                .map(id -> "?")
+                .collect(Collectors.joining(", "));
+
+        String sql = String.format(GET_MPA_BY_FILMS_SQL, inClause);
+
         return jdbcTemplate.query(sql, filmIds.toArray(), (rs) -> {
             Map<Long, Mpa> mpaMap = new HashMap<>();
             while (rs.next()) {
-                Mpa mpa = new Mpa();
-                mpa.setId(rs.getInt("mpa_id"));
-                mpa.setName(rs.getString("mpa_name"));
+                Mpa mpa = Mpa.builder()
+                        .id(rs.getInt("mpa_id"))
+                        .name(rs.getString("mpa_name"))
+                        .build();
 
                 Long filmId = rs.getLong("film_id");
                 mpaMap.put(filmId, mpa);

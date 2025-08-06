@@ -1,13 +1,14 @@
 package ru.yandex.practicum.filmorate.utils;
 
-import lombok.NoArgsConstructor;
 import ru.yandex.practicum.filmorate.model.Film;
 
 /**
- * Утилита для проверки соответствия фильма критериям поиска
+ * Утилита для проверки соответствия фильма критериям поиска.
  */
-@NoArgsConstructor
-public class FilmSearchMatcher {
+public final class FilmSearchMatcher {
+
+    private FilmSearchMatcher() {
+    }
 
     /**
      * Проверяет, соответствует ли фильм критериям поиска

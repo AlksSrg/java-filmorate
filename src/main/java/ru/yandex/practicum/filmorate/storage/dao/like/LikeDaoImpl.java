@@ -23,6 +23,7 @@ public class LikeDaoImpl implements LikeDao {
 
     private final Logger log = LoggerFactory.getLogger(LikeDaoImpl.class);
     private final JdbcTemplate jdbcTemplate;
+    private static final String GET_ALL_LIKES_SQL = "SELECT user_id, film_id FROM likes";
 
     @Override
     public void addLike(Long userId, Long filmId) {
@@ -55,8 +56,7 @@ public class LikeDaoImpl implements LikeDao {
 
     @Override
     public Map<Long, Set<Long>> getAllLikesMap() {
-        String sql = "SELECT user_id, film_id FROM likes";
-        return jdbcTemplate.query(sql, rs -> {
+        return jdbcTemplate.query(GET_ALL_LIKES_SQL, rs -> {
             Map<Long, Set<Long>> likesMap = new HashMap<>();
             while (rs.next()) {
                 Long userId = rs.getLong("user_id");

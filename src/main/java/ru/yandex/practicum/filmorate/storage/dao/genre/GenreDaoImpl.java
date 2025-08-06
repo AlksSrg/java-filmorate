@@ -22,6 +22,13 @@ public class GenreDaoImpl implements GenreDao {
 
     private final JdbcTemplate jdbcTemplate;
 
+    private static final String GET_GENRES_BY_FILMS_SQL = """
+            SELECT fg.film_id, g.genre_id, g.genre_name
+            FROM film_genre fg
+            JOIN genre g ON fg.genre_id = g.genre_id
+            WHERE fg.film_id IN (%s)
+            ORDER BY g.genre_id""";
+
     @Override
     public Genre getGenreById(Integer id) {
         try {
@@ -84,23 +91,23 @@ public class GenreDaoImpl implements GenreDao {
 
     @Override
     public Map<Long, Set<Genre>> getGenresMapByFilms(Set<Long> filmIds) {
-        String sql = """
-                SELECT fg.film_id, g.genre_id, g.genre_name
-                FROM film_genre fg
-                JOIN genre g ON fg.genre_id = g.genre_id
-                WHERE fg.film_id IN (%s)
-                ORDER BY g.genre_id""".formatted(filmIds.stream().map(id -> "?")
-                .collect(Collectors.joining(", ")));
+        String inClause = filmIds.stream()
+                .map(id -> "?")
+                .collect(Collectors.joining(", "));
+
+        String sql = String.format(GET_GENRES_BY_FILMS_SQL, inClause);
 
         return jdbcTemplate.query(sql, filmIds.toArray(), (rs) -> {
             Map<Long, Set<Genre>> genreMap = new HashMap<>();
             while (rs.next()) {
-                Genre genre = new Genre();
-                genre.setId(rs.getInt("genre_id"));
-                genre.setName(rs.getString("genre_name"));
+                Genre genre = Genre.builder()
+                        .id(rs.getInt("genre_id"))
+                        .name(rs.getString("genre_name"))
+                        .build();
 
                 Long filmId = rs.getLong("film_id");
-                genreMap.computeIfAbsent(filmId, k -> new TreeSet<>(Comparator.comparing(Genre::getId))).add(genre);
+                genreMap.computeIfAbsent(filmId, k -> new TreeSet<>(Comparator.comparing(Genre::getId)))
+                        .add(genre);
             }
             return genreMap;
         });

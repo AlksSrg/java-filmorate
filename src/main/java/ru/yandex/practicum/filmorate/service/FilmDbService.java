@@ -9,8 +9,6 @@ import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
-import ru.yandex.practicum.filmorate.model.constants.EventType;
-import ru.yandex.practicum.filmorate.model.constants.Operation;
 import ru.yandex.practicum.filmorate.storage.dao.event.EventDao;
 import ru.yandex.practicum.filmorate.storage.dao.genre.GenreDao;
 import ru.yandex.practicum.filmorate.storage.dao.like.LikeDao;
@@ -22,6 +20,8 @@ import ru.yandex.practicum.filmorate.utils.FilmPopularityComparator;
 import ru.yandex.practicum.filmorate.utils.FilmSearchMatcher;
 import ru.yandex.practicum.filmorate.utils.SearchParameterParser;
 import ru.yandex.practicum.filmorate.utils.ValidationUtils;
+import ru.yandex.practicum.filmorate.utils.constants.EventType;
+import ru.yandex.practicum.filmorate.utils.constants.Operation;
 
 import java.time.LocalDate;
 import java.util.*;

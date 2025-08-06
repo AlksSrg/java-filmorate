@@ -4,6 +4,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Length;
@@ -19,7 +21,9 @@ import java.util.Set;
  */
 
 @Data
+@Builder
 @NoArgsConstructor
+@AllArgsConstructor
 public class Film {
 
     /**
@@ -67,20 +71,4 @@ public class Film {
      * Список режиссёров фильма.
      */
     private Set<Director> directors;
-
-    /**
-     * Конструктор для создания объекта фильма с основными параметрами.
-     * Используется при создании нового фильма без дополнительных данных (жанры, режиссеры).
-     *
-     * @param name        название фильма (обязательное поле)
-     * @param description описание фильма (обязательное поле, не более 200 символов)
-     * @param releaseDate дата выхода фильма (не может быть раньше 28 декабря 1895 года)
-     * @param duration    продолжительность фильма в минутах (положительное число)
-     */
-    public Film(String name, String description, LocalDate releaseDate, int duration) {
-        this.name = name;
-        this.description = description;
-        this.releaseDate = releaseDate;
-        this.duration = duration;
-    }
 }

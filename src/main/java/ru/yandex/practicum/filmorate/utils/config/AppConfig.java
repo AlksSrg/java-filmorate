@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.config;
+package ru.yandex.practicum.filmorate.utils.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
