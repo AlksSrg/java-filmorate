@@ -32,12 +32,7 @@ public class FilmMapper implements RowMapper<Film> {
 
         Mpa mpa = new Mpa();
         mpa.setId(rs.getInt("mpa_id"));
-        try {
-            mpa.setName(rs.getString("mpa_name"));
-        } catch (SQLException e) {
-        }
         film.setMpa(mpa);
-
         return film;
     }
 }
