@@ -1,6 +1,8 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,10 +13,21 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmDbService;
 
 import java.util.Collection;
+import java.util.List;
 
 /**
- * Класс-контроллер для работы с фильмами
+ * Контроллер для работы с фильмами.
+ * Обеспечивает REST API для управления фильмами и связанными функциями.
+ * Поддерживает операции:
+ * - CRUD операции с фильмами
+ * - Управление лайками фильмов
+ * - Получение рекомендаций и популярных фильмов
+ * - Поиск фильмов по различным критериям
+ * - Работа с фильмами режиссеров
+ * <p>
+ * Все методы работают с сущностью {@link Film} и используют {@link FilmDbService} для бизнес-логики.
  */
+
 @RestController
 @RequestMapping("/films")
 @RequiredArgsConstructor
@@ -56,11 +69,11 @@ public class FilmController {
      * @return пустой ответ с успешным статусом
      */
     @PutMapping("/{film_id}/like/{user_id}")
-    public ResponseEntity<Void> addLike(@PathVariable("film_id") Long filmId, @PathVariable("user_id") Long userId) {
+    public ResponseEntity<Void> addLike(@PathVariable("film_id") Long filmId,
+                                        @PathVariable("user_id") Long userId) {
         filmService.addLike(userId, filmId);
         return ResponseEntity.noContent().build();
     }
-
 
     /**
      * Убирает лайк у фильма от конкретного пользователя.
@@ -69,11 +82,12 @@ public class FilmController {
      * @param userId уникальный идентификатор пользователя
      * @return пустой ответ с успешным статусом
      */
-    @DeleteMapping("/{film_id}/like/{id}")
-    public ResponseEntity<Void> deleteLikeFilm(@PathVariable("film_id") Long filmId, @PathVariable("id") Long userId) {
-        filmService.deleteLike(filmId, userId);
+    @DeleteMapping("/{film_id}/like/{user_id}")
+    public ResponseEntity<Void> deleteLikeFilm(@PathVariable("film_id") Long filmId,
+                                               @PathVariable("user_id") Long userId) {
+        filmService.deleteLikeFilm(filmId, userId);
         log.info("У фильма с id={} удален лайк от пользователя id={}", filmId, userId);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok().build();
     }
 
     /**
@@ -98,13 +112,76 @@ public class FilmController {
     }
 
     /**
-     * Получает список наиболее популярных фильмов.
+     * Получает список наиболее популярных фильмов с возможностью фильтрации по жанру и году.
+     * Фильмы сортируются по количеству лайков в убывающем порядке.
      *
-     * @param count количество возвращаемых фильмов (по умолчанию — 10)
-     * @return коллекция популярных фильмов
+     * @param count   количество возвращаемых фильмов (по умолчанию — 10)
+     * @param genreId идентификатор жанра для фильтрации (необязательный параметр)
+     * @param year    год выпуска фильма для фильтрации (необязательный параметр)
+     * @return коллекция популярных фильмов, отсортированных по убыванию популярности
      */
     @GetMapping("/popular")
-    public Collection<Film> getPopularFilms(@RequestParam(value = "count", defaultValue = "10") Integer count) {
-        return filmService.getPopularFilms(count);
+    public Collection<Film> getPopularFilms(
+            @RequestParam(value = "count", defaultValue = "10") Integer count,
+            @RequestParam(value = "genreId", required = false) Integer genreId,
+            @RequestParam(value = "year", required = false) Integer year) {
+        log.info("Запрос популярных фильмов: count={}, genreId={}, year={}", count, genreId, year);
+        return filmService.getPopularFilms(count, genreId, year);
+    }
+
+    /**
+     * Удаляет фильм по идентификатору.
+     *
+     * @param filmId уникальный идентификатор фильма
+     * @return пустой ответ с успешным статусом
+     */
+    @DeleteMapping("/{filmId}")
+    public ResponseEntity<Void> deleteFilmById(@PathVariable @Positive Long filmId) {
+        filmService.deleteFilmById(filmId);
+        return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * Возвращает список общих фильмов между двумя пользователями, отсортированных по популярности.
+     *
+     * @param userId   идентификатор первого пользователя
+     * @param friendId идентификатор второго пользователя
+     * @return список общих фильмов
+     */
+    @GetMapping("/common")
+    public ResponseEntity<List<Film>> getCommonFilms(
+            @RequestParam("userId") Long userId,
+            @RequestParam("friendId") Long friendId) {
+        log.info("Запрос общих фильмов для пользователей {} и {}", userId, friendId);
+        List<Film> commonFilms = filmService.getCommonFilms(userId, friendId);
+        return ResponseEntity.ok(commonFilms);
+    }
+
+    /**
+     * Поиск фильмов по названию и/или режиссёру
+     *
+     * @param query текст для поиска (обязательный параметр)
+     * @param by    параметры поиска: "director" (по режиссёру), "title" (по названию), или оба
+     *              значения через запятую (по умолчанию: "title, director")
+     * @return список фильмов, отсортированных по количеству лайков (популярности)
+     */
+    @GetMapping("/search")
+    public List<Film> searchFilms(
+            @RequestParam String query,
+            @RequestParam(defaultValue = "title,director") String by) {
+        return filmService.searchFilms(query, by);
+    }
+
+    /**
+     * Список фильмов режиссера отсортированных по количеству лайков или году выпуска.
+     *
+     * @param directorId уникальный идентификатор режиссера
+     * @param sortBy     сортировка по лайкам(likes) или году выпуска(year)
+     * @return список отсортированных фильмов
+     */
+    @GetMapping("/director/{directorId}")
+    public Collection<Film> getFilmsByDirector(@PathVariable @Positive Long directorId,
+                                               @RequestParam @NotNull String sortBy) {
+        return filmService.getFilmsByDirector(directorId, sortBy);
     }
 }

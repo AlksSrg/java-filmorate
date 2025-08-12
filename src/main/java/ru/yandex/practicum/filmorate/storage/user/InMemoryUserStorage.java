@@ -13,6 +13,7 @@ import java.util.Map;
 /**
  * Класс хранилища пользователей в оперативной памяти.
  */
+
 @Component("InMemoryUserStorage")
 @Slf4j
 public class InMemoryUserStorage implements UserStorage {
@@ -28,7 +29,7 @@ public class InMemoryUserStorage implements UserStorage {
     private Long id = 1L;
 
     /**
-     * Регистрирует нового пользователя в хранилище.
+     * Добавляет нового пользователя в хранилище.
      *
      * @param user объект пользователя для регистрации
      * @return зарегистрированный пользователь
@@ -90,5 +91,18 @@ public class InMemoryUserStorage implements UserStorage {
             log.debug("Пользователь не существует");
             throw new EntityNotFoundException(String.format("Пользователя с id %s не существует", id));
         }
+    }
+
+    /**
+     * Удаляет пользователя по идентификатору.
+     * Данная реализация не поддерживает удаление пользователей и выбрасывает исключение.
+     *
+     * @param id идентификатор пользователя для удаления
+     * @throws UnsupportedOperationException всегда, так как метод не поддерживается в данной реализации
+     */
+    @Override
+    public void deleteById(long id) {
+        log.warn("Использование устаревшей реализации");
+        throw new UnsupportedOperationException("Метод не поддерживается в устаревшей реализации");
     }
 }

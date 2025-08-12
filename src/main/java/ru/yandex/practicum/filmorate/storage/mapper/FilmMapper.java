@@ -10,6 +10,7 @@ import java.sql.SQLException;
 /**
  * Класс маппера для преобразования строк базы данных в объекты типа {@link Film}.
  */
+
 public class FilmMapper implements RowMapper<Film> {
 
     /**
@@ -32,7 +33,6 @@ public class FilmMapper implements RowMapper<Film> {
         Mpa mpa = new Mpa();
         mpa.setId(rs.getInt("mpa_id"));
         film.setMpa(mpa);
-
         return film;
     }
 }

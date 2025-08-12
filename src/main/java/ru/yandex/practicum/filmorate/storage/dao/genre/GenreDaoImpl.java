@@ -9,12 +9,25 @@ import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.mapper.GenreMapper;
 
 import java.util.*;
+import java.util.stream.Collectors;
+
+/**
+ * Реализация DAO для работы с жанрами фильмов.
+ * Обеспечивает хранение и получение жанров в базе данных.
+ */
 
 @AllArgsConstructor
 @Component
 public class GenreDaoImpl implements GenreDao {
 
     private final JdbcTemplate jdbcTemplate;
+
+    private static final String GET_GENRES_BY_FILMS_SQL = """
+            SELECT fg.film_id, g.genre_id, g.genre_name
+            FROM film_genre fg
+            JOIN genre g ON fg.genre_id = g.genre_id
+            WHERE fg.film_id IN (%s)
+            ORDER BY g.genre_id""";
 
     @Override
     public Genre getGenreById(Integer id) {
@@ -33,7 +46,7 @@ public class GenreDaoImpl implements GenreDao {
     }
 
     @Override
-    public void addGenres(Long filmId, HashSet<Genre> genres) {
+    public void addGenres(Long filmId, Set<Genre> genres) {
         if (genres != null) {
             for (Genre genre : genres) {
                 jdbcTemplate.update("INSERT INTO film_genre (film_id, genre_id) VALUES (?, ?)", filmId, genre.getId());
@@ -46,10 +59,19 @@ public class GenreDaoImpl implements GenreDao {
     }
 
     @Override
-    public void updateGenres(Long filmId, HashSet<Genre> genres) {
+    public void updateGenres(Long filmId, Set<Genre> genres) {
         deleteGenres(filmId);
-        if (genres != null) {
-            addGenres(filmId, genres);
+
+        if (genres != null && !genres.isEmpty()) {
+            List<Object[]> batchArgs = genres.stream()
+                    .sorted(Comparator.comparing(Genre::getId))
+                    .map(genre -> new Object[]{filmId, genre.getId()})
+                    .collect(Collectors.toList());
+
+            jdbcTemplate.batchUpdate(
+                    "INSERT INTO film_genre (film_id, genre_id) VALUES (?, ?)",
+                    batchArgs
+            );
         }
     }
 
@@ -65,5 +87,29 @@ public class GenreDaoImpl implements GenreDao {
         genresByFilm.addAll(genresList);
 
         return genresByFilm;
+    }
+
+    @Override
+    public Map<Long, Set<Genre>> getGenresMapByFilms(Set<Long> filmIds) {
+        String inClause = filmIds.stream()
+                .map(id -> "?")
+                .collect(Collectors.joining(", "));
+
+        String sql = String.format(GET_GENRES_BY_FILMS_SQL, inClause);
+
+        return jdbcTemplate.query(sql, filmIds.toArray(), (rs) -> {
+            Map<Long, Set<Genre>> genreMap = new HashMap<>();
+            while (rs.next()) {
+                Genre genre = Genre.builder()
+                        .id(rs.getInt("genre_id"))
+                        .name(rs.getString("genre_name"))
+                        .build();
+
+                Long filmId = rs.getLong("film_id");
+                genreMap.computeIfAbsent(filmId, k -> new TreeSet<>(Comparator.comparing(Genre::getId)))
+                        .add(genre);
+            }
+            return genreMap;
+        });
     }
 }

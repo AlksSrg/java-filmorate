@@ -1,17 +1,31 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.model.Event;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserDbService;
 
 import java.util.Collection;
+import java.util.List;
 
 /**
- * Класс-контроллер для создания и редактирования пользователей
+ * Контроллер для работы с пользователями.
+ * Обеспечивает REST API для управления пользователями и их активностью.
+ * Поддерживает операции:
+ * - CRUD операции с пользователями
+ * - Управление дружескими связями
+ * - Получение рекомендаций фильмов
+ * - Просмотр ленты событий
+ * - Поиск общих друзей
+ * <p>
+ * Все методы работают с сущностью {@link User} и используют {@link UserDbService} для бизнес-логики.
  */
+
 @RestController
 @RequestMapping("/users")
 @AllArgsConstructor
@@ -82,6 +96,17 @@ public class UserController {
     }
 
     /**
+     * Возвращает ленту событий пользователя
+     *
+     * @param id идентификатор пользователя
+     * @return список событий пользователя
+     */
+    @GetMapping("/{id}/feed")
+    public ResponseEntity<List<Event>> getUserFeed(@PathVariable Long id) {
+        return ResponseEntity.ok(userService.getUserFeed((id)));
+    }
+
+    /**
      * Возвращает пользователя по его идентификатору.
      *
      * @param id идентификатор пользователя
@@ -112,5 +137,29 @@ public class UserController {
     @GetMapping
     public ResponseEntity<Collection<User>> getUsers() {
         return ResponseEntity.ok(userService.getAllUsers());
+    }
+
+    /**
+     * Удаляет пользователя по идентификатору.
+     *
+     * @param userId уникальный идентификатор фильма
+     * @return пустой ответ с успешным статусом
+     */
+    @DeleteMapping("/{userId}")
+    public ResponseEntity<Void> deleteUserById(@PathVariable @Positive Long userId) {
+        userService.deleteUserById(userId);
+        return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * Возвращает список рекомендаций фильмов для указанного пользователя.
+     * Рекомендации основаны на оценках других пользователей с похожими предпочтениями.
+     *
+     * @param userId уникальный идентификатор пользователя
+     * @return список рекомендованных фильмов
+     */
+    @GetMapping("/{id}/recommendations")
+    public List<Film> getRecommendations(@PathVariable(value = "id") @Positive Long userId) {
+        return userService.getRecommendations(userId);
     }
 }

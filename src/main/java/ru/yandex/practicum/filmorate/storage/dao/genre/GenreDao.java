@@ -2,12 +2,13 @@ package ru.yandex.practicum.filmorate.storage.dao.genre;
 
 import ru.yandex.practicum.filmorate.model.Genre;
 
-import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 /**
  * Интерфейс для работы с жанрами фильмов.
  */
+
 public interface GenreDao {
 
     /**
@@ -31,7 +32,7 @@ public interface GenreDao {
      * @param filmId идентификатор фильма
      * @param genres набор новых жанров
      */
-    void addGenres(Long filmId, HashSet<Genre> genres);
+    void addGenres(Long filmId, Set<Genre> genres);
 
     /**
      * Обновляет существующие жанры фильма новой коллекцией.
@@ -39,7 +40,7 @@ public interface GenreDao {
      * @param filmId идентификатор фильма
      * @param genres новая коллекция жанров
      */
-    void updateGenres(Long filmId, HashSet<Genre> genres);
+    void updateGenres(Long filmId, Set<Genre> genres);
 
     /**
      * Возвращает жанры, присвоенные определенному фильму.
@@ -48,4 +49,12 @@ public interface GenreDao {
      * @return набор жанров фильма
      */
     Set<Genre> getGenresByFilm(Long filmId);
+
+    /**
+     * Возвращает таблицу жанров для заданного списка id фильмов.
+     *
+     * @param filmIds список id фильмов
+     * @return таблицу, где ключ - id фильма, значение - список жанров.
+     */
+    Map<Long, Set<Genre>> getGenresMapByFilms(Set<Long> filmIds);
 }

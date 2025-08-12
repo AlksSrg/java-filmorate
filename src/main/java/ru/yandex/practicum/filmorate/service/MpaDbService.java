@@ -10,8 +10,18 @@ import ru.yandex.practicum.filmorate.storage.dao.mpa.MpaDao;
 import java.util.Collection;
 
 /**
- * Репозиторий для операций с рейтингами MPA.
+ * Сервис для работы с возрастными рейтингами MPA.
+ * Обеспечивает доступ к информации о рейтингах.
+ *
+ * <p>Поддерживаемые операции:</p>
+ * <ul>
+ *   <li>Получение рейтинга по ID</li>
+ *   <li>Получение списка всех рейтингов</li>
+ * </ul>
+ *
+ * <p>Использует {@link MpaDao} для доступа к данным.</p>
  */
+
 @Service
 @RequiredArgsConstructor
 public class MpaDbService {
@@ -39,7 +49,7 @@ public class MpaDbService {
     /**
      * Возвращает список всех рейтингов MPA.
      *
-     * @return коллекция рейтингов MPAA
+     * @return коллекция рейтингов MPA
      */
     public Collection<Mpa> getListMpa() {
         return mpaDao.getListMpa();

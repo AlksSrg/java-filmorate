@@ -1,8 +1,12 @@
 package ru.yandex.practicum.filmorate.storage.dao.like;
 
+import java.util.Map;
+import java.util.Set;
+
 /**
  * Интерфейс для работы с лайками фильмов.
  */
+
 public interface LikeDao {
 
     /**
@@ -28,4 +32,35 @@ public interface LikeDao {
      * @return количество лайков у фильма
      */
     int checkLikes(Long filmId);
+
+    /**
+     * Получает карту из БД с фильмами у которых стоят лайки.
+     *
+     * @return Возвращает карту, где ключом является идентификатор пользователя, а значением -
+     * множество идентификаторов фильмов, которым пользователь поставил лайк.
+     */
+    Map<Long, Set<Long>> getAllLikesMap();
+
+    /**
+     * Возвращает ID фильмов, которым пользователь поставил лайк
+     *
+     * @param userId идентификатор пользователя
+     * @return множество ID фильмов
+     */
+    Set<Long> getLikedFilms(Long userId);
+
+    /**
+     * Возвращает количество лайков у фильма
+     *
+     * @param filmId идентификатор фильма
+     * @return количество лайков
+     */
+    int getLikesCount(Long filmId);
+
+    /**
+     * Получает количество лайков для всех фильмов одним запросом
+     *
+     * @return Map, где ключ - ID фильма, значение - количество лайков
+     */
+    Map<Long, Integer> getLikesCountForAllFilms();
 }

@@ -1,13 +1,24 @@
 package ru.yandex.practicum.filmorate.model;
 
 import jakarta.validation.constraints.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 
+/**
+ * Модель пользователя системы.
+ * Содержит основную информацию о пользователе:
+ * идентификатор, email, логин, имя и дату рождения.
+ * Поддерживает валидацию всех обязательных полей.
+ */
+
 @Data
+@Builder
 @NoArgsConstructor
+@AllArgsConstructor
 public class User {
 
     /**
@@ -16,7 +27,7 @@ public class User {
     private Long id;
 
     /**
-     * Электронная почта пользователя, должна быть валидной и обязательной.
+     * Электронная почта. Обязательное поле, должно быть валидным email.
      */
     @Email(message = "Электронная почта должна соответствовать стандартному формату.")
     @NotBlank(message = "Адрес электронной почты не может быть пустым.")
@@ -31,7 +42,7 @@ public class User {
     private String login;
 
     /**
-     * Имя пользователя (может быть пустым).
+     * Имя пользователя. Если не указано, используется логин.
      */
     private String name;
 
@@ -41,19 +52,4 @@ public class User {
     @PastOrPresent(message = "Дата рождения не может быть в будущем.")
     @NotNull
     private LocalDate birthday;
-
-    /**
-     * Конструктор для создания экземпляра пользователя с указанными параметрами.
-     *
-     * @param email    электронная почта пользователя
-     * @param login    логин пользователя
-     * @param name     имя пользователя
-     * @param birthday дата рождения пользователя
-     */
-    public User(String email, String login, String name, LocalDate birthday) {
-        this.email = email;
-        this.login = login;
-        this.name = name;
-        this.birthday = birthday;
-    }
 }

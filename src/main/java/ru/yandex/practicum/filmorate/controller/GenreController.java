@@ -13,8 +13,15 @@ import ru.yandex.practicum.filmorate.service.GenreDbService;
 import java.util.Set;
 
 /**
- * Класс-контроллер для получения данных о жанрах.
+ * Контроллер для работы с жанрами фильмов.
+ * Обеспечивает REST API для доступа к информации о жанрах.
+ * Поддерживает операции:
+ * - Получение жанра по идентификатору
+ * - Получение полного списка жанров
+ * <p>
+ * Все методы работают с сущностью {@link Genre} и используют {@link GenreDbService} для бизнес-логики.
  */
+
 @RestController
 @RequestMapping("/genres")
 @RequiredArgsConstructor
@@ -24,7 +31,7 @@ public class GenreController {
     private final GenreDbService genreService;
 
     /**
-     * Метод возвращает жанр по заданному идентификатору.
+     * Возвращает жанр по заданному идентификатору.
      *
      * @param id идентификатор жанра
      * @return объект жанра
@@ -36,7 +43,7 @@ public class GenreController {
     }
 
     /**
-     * Метод возвращает коллекцию всех жанров.
+     * Возвращает коллекцию всех жанров.
      *
      * @return набор объектов жанров
      */
